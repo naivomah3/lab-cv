@@ -40,13 +40,11 @@ def vgg_fcn8s(pretrained=False, model_path=None, n_classes=None, input_h=320, in
     x = Conv2D(2**b, (3, 3), activation='elu', padding='same', name='block1_conv1')(s)
     x = Conv2D(2**b, (3, 3), activation='elu', padding='same', name='block1_conv2')(x)
     x = MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool')(x)
-    f1 = x
 
     # Block 2
     x = Conv2D(2**(b+1), (3, 3), activation='elu', padding='same', name='block2_conv1')(x)
     x = Conv2D(2**(b+1), (3, 3), activation='elu', padding='same', name='block2_conv2')(x)
     x = MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool')(x)
-    f2 = x
 
     # Block 3
     x = Conv2D(2**(b+2), (3, 3), activation='elu', padding='same', name='block3_conv1')(x)
