@@ -36,8 +36,8 @@ def image_data_generator(frames_path=None, masks_path=None, fnames=None, n_class
         rand_filenames = np.random.choice(a=fnames, size=batch_size)
 
         for filename in rand_filenames:
-            frame = get_frame(os.path.join(frames_path, filename), 320, 320, n_classes)
-            mask = get_mask(os.path.join(masks_path, filename), 320, 320)
+            frame = get_frame(os.path.join(frames_path, filename), 320, 320)
+            mask = get_mask(os.path.join(masks_path, filename), 320, 320, n_classes= n_classes)
             batch_frames.append(frame)
             batch_masks.append(mask)
 
