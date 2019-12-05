@@ -2,6 +2,8 @@ import os, cv2
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from pickle import dump, load
+
 from models.vgg_fcn8 import vgg_fcn8s
 from helpers.data_generator import image_data_generator, image_data_builder
 from helpers.data_slicing import get_rand_name
