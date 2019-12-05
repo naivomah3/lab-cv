@@ -9,7 +9,7 @@ def train_model(train_frames_path, train_masks_path, val_frames_path, val_masks_
     train_fnames = os.listdir(train_frames_path)
     val_fnames = os.listdir(val_frames_path)
 
-    train_generator = image_data_generator(train_frames_path, train_masks_path, train_fnames, batch_size=25)
+    train_generator = image_data_generator(frames_path=train_frames_path, masks_path=train_masks_path, fnames=train_fnames, batch_size=25)
     val_generator = image_data_generator(val_frames_path, val_masks_path, val_fnames, batch_size=10)
 
     # Create checkpoint callbacks for history

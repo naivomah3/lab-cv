@@ -75,21 +75,19 @@ def img_crop_8(src_frames, src_masks, dst_frames, dst_masks):
         img_in = cv2.imread(os.path.join(src_frames, img_fname + '.png'))
         mask_in = np.load(os.path.join(src_masks, img_fname + '.npy'))
 
-        for w in range(0, img_in.shape[1], img_in.shape[1]//4):
-            for h in range (0, img_in.shape[0], img_in.shape[1]//2):
-                img_out = img_in[h:h+(img_in.shape[0]//2), w:w+(img_in.shape[1]//4)]
-                mask_out = mask_in[h:h+(img_in.shape[0]//2), w:w+(img_in.shape[1]//4)]
+        for w in range(0, 1280, 320):
+            for h in range (0, 720, 360):
+                img_out = img_in[h:h+360, w:w+320]
+                mask_out = mask_in[h:h+360, w:w+320]
                 fname = get_rand_name()
                 cv2.imwrite(os.path.join(dst_frames, fname + '.png'), img_out)
                 cv2.imwrite(os.path.join(dst_masks, fname + '.png'), mask_out)
-
 
 # Create dataset with the appropriate size
 def get_frame(frame_path, height, width):
     frame = cv2.imread(frame_path, 1)
     frame = np.float32(cv2.resize(frame, (height, width)))
     return frame
-
 
 def get_mask(mask_path, height, width, n_classes):
     # Mask depth should be the same as the number of classes

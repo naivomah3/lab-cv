@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import os
+from random import shuffle
 
 # Create dataset with the appropriate size
 def get_frame(frame_path, height, width):
@@ -9,7 +10,7 @@ def get_frame(frame_path, height, width):
     return frame
 
 
-def get_mask(mask_path, height, width, n_classes):
+def get_mask(mask_path=None, height=None, width=None, n_classes=None):
     # Mask depth should be the same as the number of classes
     mask_depth = np.zeros((height, width, n_classes))  # Each depth will be fed one-by-one corresponding to the classs label
     mask = cv2.imread(mask_path, 1)
@@ -24,7 +25,7 @@ def get_mask(mask_path, height, width, n_classes):
 
 
 # Batch generator for Training and Validation
-def image_data_generator(frame_path, mask_path, fnames, batch_size=32):
+def image_data_generator(frames_path=None, masks_path=None, fnames=None, n_classes=None, batch_size=32):
     '''
     fnames: a list of all frames file name == list of all mask file names
     '''
@@ -35,8 +36,8 @@ def image_data_generator(frame_path, mask_path, fnames, batch_size=32):
         rand_filenames = np.random.choice(a=fnames, size=batch_size)
 
         for filename in rand_filenames:
-            frame = get_frame(os.path.join(frame_path, filename), 320, 320)
-            mask = get_mask(os.path.join(mask_path, filename), 320, 320)
+            frame = get_frame(os.path.join(frames_path, filename), 320, 320, n_classes)
+            mask = get_mask(os.path.join(masks_path, filename), 320, 320)
             batch_frames.append(frame)
             batch_masks.append(mask)
 
@@ -47,12 +48,12 @@ def image_data_generator(frame_path, mask_path, fnames, batch_size=32):
 
 
 # Build data without generator for Testing
-def image_data_builder(frame_path, mask_path, fnames):
+def image_data_builder(frames_path=None, masks_path=None, fnames=None):
     # X[i]: Matrix of input image with depth=3, Y Matrix of label image with depth=n_classes
     X_test, Y_test = list(), list()
     for file_name in fnames:
-        X_test.append(get_frame(os.path.join(frame_path, file_name), 320, 320))
-        Y_test.append(get_mask(os.path.join(mask_path, file_name), 320, 320))
+        X_test.append(get_frame(os.path.join(frames_path, file_name), 320, 320))
+        Y_test.append(get_mask(os.path.join(masks_path, file_name), 320, 320))
 
-    #X_test, Y_test = shuffle(X_test, Y_test)
+    X_test, Y_test = shuffle(X_test, Y_test)
     return np.array(X_test), np.array(Y_test)
