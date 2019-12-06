@@ -1,14 +1,13 @@
 # Augmentation using albumentation
 # https://albumentations.readthedocs.io/en/latest/examples.html
 import albumentations as alb
-import random
 import os, random, string
 import cv2
-from data_prepare import get_rand_name
+from helpers.data_slicing import get_rand_name
 
 
 def generate_aug_img(p=0.7, img_in='', mask_in='', img_out='', mask_out='', num_gen=0):
-    # define augmentation pipeline
+
     pipeline = alb.Compose([
         alb.VerticalFlip(),
         alb.HorizontalFlip(),

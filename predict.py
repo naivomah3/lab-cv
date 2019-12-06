@@ -1,8 +1,9 @@
-import os, cv2
+import os
+import cv2
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from pickle import dump, load
+from pickle import load
 
 from models.vgg_fcn8 import vgg_fcn8s
 from helpers.data_generator import image_data_generator, image_data_builder
@@ -47,8 +48,8 @@ def color_mask(mask=None, n_classes=None):
     return (mask_chanels)
 
 
-def plot_prediction(frames=None, masks=None, predictions=None, frames_out_path=None, masks_out_path=None, predict_path=None):
-    for i in range(50):
+def plot_prediction(frames=None, masks=None, predictions=None, frames_out_path=None, masks_out_path=None, predict_out_path=None, n_frames=0):
+    for i in range(n_frames):
         rand_name = get_rand_name()
         print(np.unique(color_mask(masks[i])))
         fig = plt.figure(figsize=(14, 20))
@@ -68,7 +69,7 @@ def plot_prediction(frames=None, masks=None, predictions=None, frames_out_path=N
         axs.set_title(f"Predicted mask: ({predictions[i].shape[0]}, {predictions[i].shape[1]})")
         axs.imshow(color_mask(predictions[i]))
         # Save predicted mask as png
-        cv2.imwrite(os.path.join(predict_path, rand_name + '.png'), color_mask(predictions[i]) * 230)
+        cv2.imwrite(os.path.join(predict_out_path, rand_name + '.png'), color_mask(predictions[i]) * 230)
 
         plt.show()
 
@@ -139,15 +140,23 @@ def plot_history(history_file):
 
 #-------------------------------------------------------------------------------------------
 # Validation path(frames+masks)
-frames_path = 'dataset/test/frames'
-masks_path = 'dataset/test/masks'
+frames_in_path = 'dataset/test/frames'
+masks_in_path = 'dataset/test/masks'
+# Prediction path
+frames_out_path = 'dataset/prediction/frames'
+masks_out_path = 'dataset/prediction/masks'
+predict_out_path = 'dataset/prediction/predicts'  # Where predicted masks will be stored
+#
 model_path = 'vgg_fcn8s.model'      # change to 'vgg_unet.model' to load U-Net model
 history_path = 'segroad_fcn8_train_26_11_19.history'    # change to 'segroad_unet_train_26_11_19.history' to load U-Net history
 labels = ['background', 'road', 'occluded_road']
 n_classes = len(labels)
 
 # Prediction
-frames, masks, predicts = predict(frames_path=frames_path, masks_path=masks_path, model_path=model_path, n_classes=n_classes)
+frames, masks, predicts = predict(frames_path=frames_in_path,
+                                  masks_path=masks_in_path,
+                                  model_path=model_path,
+                                  n_classes=n_classes)
 
 # OneHot masks and predicted mask upon probabilities
 masks = np.argmax(masks, axis=3)
@@ -161,3 +170,11 @@ print_scores(ious, dices, precision, recall, accuracy)
 
 # Plot history
 plot_history(history_path)
+
+
+# Plot prediction
+plot_prediction(frames=frames, masks=masks, predictions=predicts,
+                frames_out_path=frames_out_path,
+                masks_out_path=masks_out_path,
+                predict_out_path=predict_out_path, n_frames=5)
+

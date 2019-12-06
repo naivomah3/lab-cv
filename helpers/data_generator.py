@@ -49,7 +49,7 @@ def image_data_generator(frames_path=None, masks_path=None, fnames=None, n_class
 
 # Build data without generator for Testing
 def image_data_builder(frames_path=None, masks_path=None, fnames=None):
-    # X[i]: Matrix of input image with depth=3, Y Matrix of label image with depth=n_classes
+    # X[i]: Matrix of input image of depth=3, Y Matrix of label image with depth=n_classes
     X_test, Y_test = list(), list()
     for file_name in fnames:
         X_test.append(get_frame(os.path.join(frames_path, file_name), 320, 320))
@@ -57,3 +57,4 @@ def image_data_builder(frames_path=None, masks_path=None, fnames=None):
 
     X_test, Y_test = shuffle(X_test, Y_test)
     return np.array(X_test), np.array(Y_test)
+
