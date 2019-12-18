@@ -21,7 +21,7 @@ def dice(y_true, y_pred, smooth=1.):
     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
 
-def vgg_fcn8s(pretrained=False, model_path=None, n_classes=None, input_h=320, input_w=320, base=6):
+def vgg_fcn8s(pretrained=False, model_path=None, n_classes=None, input_h=320, input_w=320, base_exp=6):
     # Load pre-trained model instead
     if pretrained:
         if os.path.exists(model_path):
@@ -29,14 +29,14 @@ def vgg_fcn8s(pretrained=False, model_path=None, n_classes=None, input_h=320, in
             #model.summary()
             return model
         else:
-            print(f'Failed to load  the existing model at {model_path}')
+            print(f'Failed to load the existing model at {model_path}')
 
-    b = base
+    b = base_exp
     i = Input((input_h, input_w, 3))
     # Lambda layer to simple pre-process pixel values(such as Normalization, ...)
     s = Lambda(lambda x: preprocess_input(x))(i)
 
-    ## Block 1
+    # Block 1
     x = Conv2D(2**b, (3, 3), activation='elu', padding='same', name='block1_conv1')(s)
     x = Conv2D(2**b, (3, 3), activation='elu', padding='same', name='block1_conv2')(x)
     x = MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool')(x)

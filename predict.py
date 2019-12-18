@@ -120,17 +120,17 @@ def load_hist(filename):
     return hist
 
 # Plot training history from file
-def plot_history(history_file):
+def plot_history(history_file=None, model_type=None):
     history = load_hist(history_file)
     fig = plt.figure(figsize=(14, 20))
     axs = fig.add_subplot(1, 2, 1)
-    axs.set_title("FCN-8")
+    axs.set_title(f"{model_type} loss")
     axs.plot(history['loss'], 'b', label='Training loss')
     axs.plot(history['val_loss'], 'r', label='Validation loss')
     axs.legend()
 
     axs = fig.add_subplot(1, 2, 2)
-    axs.set_title("U-Net")
+    axs.set_title(f"{model_type} dice")
     axs.plot(history['dice'], 'b', label='Training dice')
     axs.plot(history['val_dice'], 'r', label='Validation dice')
     axs.legend()
@@ -138,7 +138,6 @@ def plot_history(history_file):
     plt.show()
 
 
-#-------------------------------------------------------------------------------------------
 # Validation path(frames+masks)
 frames_in_path = 'dataset/test/frames'
 masks_in_path = 'dataset/test/masks'
@@ -146,10 +145,10 @@ masks_in_path = 'dataset/test/masks'
 frames_out_path = 'dataset/prediction/frames'
 masks_out_path = 'dataset/prediction/masks'
 predict_out_path = 'dataset/prediction/predicts'  # Where predicted masks will be stored
-#
+
 model_path = 'vgg_fcn8s.model'      # change to 'vgg_unet.model' to load U-Net model
 history_path = 'segroad_fcn8_train_26_11_19.history'    # change to 'segroad_unet_train_26_11_19.history' to load U-Net history
-labels = ['background', 'road', 'occluded_road']
+labels = ['background', 'road', 'occlusion']
 n_classes = len(labels)
 
 # Prediction
@@ -168,9 +167,8 @@ ious, dices, precision, recall, accuracy = evaluate(masks=masks, predictions=pre
 # Get scores
 print_scores(ious, dices, precision, recall, accuracy)
 
-# Plot history
-plot_history(history_path)
-
+# Plot history from pickle
+plot_history(history_file=history_path, model_type="FCN-8")
 
 # Plot prediction
 plot_prediction(frames=frames, masks=masks, predictions=predicts,

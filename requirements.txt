@@ -1,0 +1,15 @@
+#	  pip install ipkernel
+#	  python -m ipykernel install --user --name=ENV_NAME   # Make MV visible on jupyter-{notebook,lab}
+
+#     conda create --name py-seg python=3.6.7
+#     source activate py-seg
+#     pip install -r requirements.txt
+
+numpy
+scipy
+matplotlib
+scikit-learn
+pandas
+seaborn
+tensorflow		# CPU Version
+#tensorflow-gpu	# GPU version
