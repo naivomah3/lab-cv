@@ -13,7 +13,7 @@ There are a few but important prerequisites that (may) need to be set before mak
 conda create --name ENV_NAME python=3.6.7
 source activate ENV_NAME
 ```
-### Install requirement packages
+### Install required packages
 ```bash 
 pip install -r requirements.txt
 ```
