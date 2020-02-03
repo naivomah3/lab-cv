@@ -1,18 +1,6 @@
-# Install NEW ENV:
-#$ conda create --name ENV_NAME python=3.6.7
-#$ source activate ENV_NAME
-#$ pip install -r requirements.txt
-
-# Make your ENV visible on jupyter-{notebook,lab}:
-#$ pip install ipkernel
-#$ python -m ipykernel install --user --name=ENV_NAME
-
 numpy
 scipy
 matplotlib
-scikit-learn
-pandas
-seaborn
 # CPU Version
 tensorflow
 # uncomment for GPU version

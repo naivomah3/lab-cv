@@ -11,27 +11,31 @@ FRAMES_TRAIN_PATH = os.environ.get("FRAMES_TRAIN_PATH")
 MASKS_TRAIN_PATH = os.environ.get("MASKS_TRAIN_PATH")
 FRAMES_VAL_PATH = os.environ.get("FRAMES_VAL_PATH")
 MASKS_VAL_PATH = os.environ.get("MASKS_VAL_PATH")
-
 #MODEL = os.environ.get("MODEL")
 MODELS_OUT_PATH = os.environ.get("MODELS_OUT_PATH")
+# Number of classes [2:'binary', >2:'multilabel']
+NO_CLASSES = int(os.environ.get("NO_CLASSES"))
+# Frames&masks input dimension
+INPUT_HEIGHT = int(os.environ.get("INPUT_HEIGHT"))
+INPUT_WIDTH = int(os.environ.get("INPUT_WIDTH"))
 
 if __name__ == '__main__':
     # Image generator
     train_generator = data_generator(frames_path=FRAMES_TRAIN_PATH,
                                        masks_path=MASKS_TRAIN_PATH,
                                        fnames=os.listdir(FRAMES_TRAIN_PATH),
-                                       n_classes=3,
-                                       input_h=320,
-                                       input_w=320,
+                                       n_classes=NO_CLASSES,
+                                       input_h=INPUT_HEIGHT,
+                                       input_w=INPUT_WIDTH,
                                        batch_size=25,
                                        is_resizable=True)
 
     val_generator = data_generator(frames_path=FRAMES_VAL_PATH,
                                        masks_path=MASKS_VAL_PATH,
                                        fnames=os.listdir(FRAMES_VAL_PATH),
-                                       n_classes=3,
-                                       input_h=320,
-                                       input_w=320,
+                                       n_classes=NO_CLASSES,
+                                       input_h=INPUT_HEIGHT,
+                                       input_w=INPUT_WIDTH,
                                        batch_size=10,
                                        is_resizable=True)
 
@@ -55,9 +59,9 @@ if __name__ == '__main__':
     # Create model
     model = UNet.build(pre_trained=False,
                        model_path=MODELS_OUT_PATH,
-                       n_classes=3,
-                       input_h=320,
-                       input_w=320)
+                       n_classes=NO_CLASSES,
+                       input_h=INPUT_HEIGHT,
+                       input_w=INPUT_WIDTH)
 
     history = model.fit_generator(generator=train_generator,
                                   steps_per_epoch=32,  # train_len(850 images) = batch_size * steps_per_epoch

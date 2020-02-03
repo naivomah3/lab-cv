@@ -7,16 +7,21 @@ from src.engine import get_rand_name, color_img
 from src.unet import UNet
 
 
-# Load Env. variables
+# input set
 FRAMES_TEST_IN_PATH = os.environ.get("FRAMES_TEST_IN_PATH")
 MASKS_TEST_IN_PATH = os.environ.get("MASKS_TEST_IN_PATH")
-
+# output set
 FRAMES_TEST_OUT_PATH = os.environ.get("FRAMES_TEST_OUT_PATH")
 MASKS_TEST_OUT_PATH = os.environ.get("MASKS_TEST_OUT_PATH")
 MASKS_PREDICT_OUT_PATH = os.environ.get("MASKS_PREDICT_OUT_PATH")
-
 # Model path
 UNET_MODEL_PATH = os.environ.get("UNET_MODEL_PATH")
+# Number of classes [2:'binary', >2:'multilabel']
+NO_CLASSES = int(os.environ.get("NO_CLASSES"))
+# Frames&masks input dimension
+INPUT_HEIGHT = int(os.environ.get("INPUT_HEIGHT"))
+INPUT_WIDTH = int(os.environ.get("INPUT_WIDTH"))
+
 
 
 if __name__ == '__main__':
@@ -30,16 +35,20 @@ if __name__ == '__main__':
         quit(f"Directory not found")
 
     # Create model
-    model = UNet.build(pre_trained=True, model_path=UNET_MODEL_PATH, n_classes=3, input_h=320, input_w=320)
+    model = UNet.build(pre_trained=True,
+                       model_path=UNET_MODEL_PATH,
+                       n_classes=NO_CLASSES,
+                       input_h=INPUT_HEIGHT,
+                       input_w=INPUT_WIDTH)
 
     # If images are loaded from generator
     if is_generator:
         test_data_generated = data_generator(frames_path=FRAMES_TEST_IN_PATH,
                                              masks_path=MASKS_TEST_IN_PATH,
                                              fnames=os.listdir(MASKS_TEST_IN_PATH),
-                                             input_h=320,
-                                             input_w=320,
-                                             n_classes=3,
+                                             input_h=INPUT_HEIGHT,
+                                             input_w=INPUT_WIDTH,
+                                             n_classes=NO_CLASSES,
                                              batch_size=10,
                                              is_resizable=True)
         predicted_masks = model.predict_generator(test_data_generated, steps=15)
@@ -48,9 +57,9 @@ if __name__ == '__main__':
     else:
         test_frames, test_masks = data_loader(frames_path=FRAMES_TEST_IN_PATH,
                                               masks_path=MASKS_TEST_IN_PATH,
-                                              input_h=320,
-                                              input_w=320,
-                                              n_classes=3,
+                                              input_h=INPUT_HEIGHT,
+                                              input_w=INPUT_WIDTH,
+                                              n_classes=NO_CLASSES,
                                               fnames=os.listdir(MASKS_TEST_IN_PATH),
                                               is_resizable=True)
         # Predictive probs
@@ -74,10 +83,10 @@ if __name__ == '__main__':
                     test_frames[i])
         # Save ground truth mask
         cv2.imwrite(os.path.join(MASKS_TEST_OUT_PATH, fname + '.png'),
-                    color_img(test_masks[i], 3))
+                    color_img(test_masks[i], NO_CLASSES))
         # Save predicted mask
         cv2.imwrite(os.path.join(MASKS_PREDICT_OUT_PATH, fname + '.png'),
-                    color_img(predicted_masks[i], 3))
+                    color_img(predicted_masks[i], NO_CLASSES))
 
 
 

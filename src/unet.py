@@ -9,7 +9,7 @@ from src.engine import scale_input
 
 class UNet:
     @staticmethod
-    def build(pre_trained=False, model_path=None, n_classes=None, input_h=320, input_w=320):
+    def build(pre_trained=False, model_path=None, n_classes=None, input_h=None, input_w=None):
         if pre_trained:
             if os.path.exists(model_path):
                 model = load_model(model_path, custom_objects={'dice': dice, 'preprocess_input': scale_input})
