@@ -5,6 +5,54 @@ and able to generalize to later extension as well as to build our own dataset.
 
 > **Please note:** the development is undergoing and details will gradually be provided below. 
 
+## Prerequisites
+There are a few but important prerequisites that (may) need to be set before making any change. Note that everything has been tested with `python==3.6.7` 
+
+### Create new [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows.html) environment 
+```bash
+conda create --name ENV_NAME python=3.6.7
+source activate ENV_NAME
+```
+### Install requirement packages
+```bash 
+pip install -r requirements.txt
+```
+
+## Directory structure
+* `/input` contains images/frames and their respective masks within each set(training/validation/testing). `masks` and `testing` set would be a 2D matrix of dimension `(height x width x 1)` mapping the spatial distribution of each class/label. As an example, please find here 
+
+```bash
+/input
+├── testing # Testing data 
+│   ├── images
+│   └── mask
+├── training   # Training data 
+│   ├── images
+│   └── mask
+└── validation # Validation data
+    ├── images
+    └── mask
+```
+* `/output` contains predicted masks referred from input/prediction along with their respective frames within each respective subfolders and named the same way to avoid confusion. `masks` and `prediction` sets would be a 2D matrix of dimension `(height x width x 3)` colored with respect to the spatial distribution of each class/label. As an example, please find here
+```bash
+/output   
+└── prediction # Prediction data 
+    ├── images
+    ├── mask
+    └── prediction
+```
+* `/models` where to store in and load from the models.  
+
+
+## Usage
+* For training and prediction, refer to `train.sh` and `predict.sh` respectively to define necessary environment variables. 
+```bash
+# How to train? 
+sh train.sh
+# How to predict?
+sh predict.sh
+```
+
 ##### Major update
 | Timeline | Comments |
 | -------- | -------- |
