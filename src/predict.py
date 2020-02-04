@@ -82,6 +82,7 @@ if __name__ == '__main__':
                     color_img(predicted_masks[i], NO_CLASSES))
 
 
-
+    # Evaluation
+    
 
 
