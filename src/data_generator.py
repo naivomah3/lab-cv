@@ -8,19 +8,11 @@ import os
 # load image of desired size
 def get_frame(frame_path, height, width, is_resizable=False):
     frame = cv2.imread(frame_path, 1)
-    #print(f"GET FRAME: {frame.shape}")
-    #if is_resizable:
-    #    frame = np.float32(cv2.resize(frame, (height, width)))
     return frame
 
 # load image of desired size
 def get_mask(mask_path=None, height=None, width=None, n_classes=None, is_resizable=False):
     mask = cv2.imread(mask_path)
-    #if is_resizable:
-    #    mask = cv2.resize(mask, (height, width))
-    # Make sure having the map of all classes in one depth
-    #mask_ref = np.argmax(mask, axis=3)
-    #print(mask_ref.shape)
     if n_classes == 2:
         return mask
     else:
