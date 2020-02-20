@@ -1,72 +1,113 @@
 import os
+from datetime import datetime
+from src.data_generator import data_generator, data_loader
+from src import models
+from src.callbacks import get_callbacks
 
-from datetime import date
-from keras.callbacks import ModelCheckpoint, CSVLogger
-
-from src.data_generator import data_generator
-from src.unet import UNet
-
-# Load Env. variables
+# Load all environment variables
 FRAMES_TRAIN_PATH = os.environ.get("FRAMES_TRAIN_PATH")
 MASKS_TRAIN_PATH = os.environ.get("MASKS_TRAIN_PATH")
 FRAMES_VAL_PATH = os.environ.get("FRAMES_VAL_PATH")
 MASKS_VAL_PATH = os.environ.get("MASKS_VAL_PATH")
-#MODEL = os.environ.get("MODEL")
+# MODEL&BACKBONE
+MODEL = os.environ.get("MODEL")
+BACKBONE = os.environ.get("BACKBONE")
+
 MODELS_OUT_PATH = os.environ.get("MODELS_OUT_PATH")
-# Number of classes [2:'binary', >2:'multilabel']
-NO_CLASSES = int(os.environ.get("NO_CLASSES"))
-# Frames&masks input dimension
-INPUT_HEIGHT = int(os.environ.get("INPUT_HEIGHT"))
-INPUT_WIDTH = int(os.environ.get("INPUT_WIDTH"))
+
+# Batch-size
+TRAIN_BATCH_SIZE = int(os.environ.get("TRAIN_BATCH_SIZE"))
+VAL_BATCH_SIZE = int(os.environ.get("VAL_BATCH_SIZE"))
+# Steps per epoch:
+TRAIN_STEPS_PER_EPOCH = int(os.environ.get("TRAIN_STEPS_PER_EPOCH"))
+VAL_STEPS_PER_EPOCH = int(os.environ.get("VAL_STEPS_PER_EPOCH"))
+# Number of epochs
+# Frames&masks input dimensions
+IN_HEIGHT = int(os.environ.get("IN_HEIGHT"))
+IN_WIDTH = int(os.environ.get("IN_WIDTH"))
+NO_EPOCHS = int(os.environ.get("NO_EPOCHS"))
+
+# get problem name for naming history/model
+P_NAME = os.environ.get("PROBLEM")
+
+# load file containing list of classes
+LABELS_FILE = os.environ.get("LABELS_FILE")
+with open(LABELS_FILE, 'r') as file:
+    CLASSES = len(list(file))
+if not CLASSES:
+    raise Exception("Unable to load label file")
 
 if __name__ == '__main__':
-    # Image generator
-    train_generator = data_generator(frames_path=FRAMES_TRAIN_PATH,
-                                       masks_path=MASKS_TRAIN_PATH,
-                                       fnames=os.listdir(FRAMES_TRAIN_PATH),
-                                       n_classes=NO_CLASSES,
-                                       input_h=INPUT_HEIGHT,
-                                       input_w=INPUT_WIDTH,
-                                       batch_size=25,
-                                       is_resizable=True)
+    generator = True
 
-    val_generator = data_generator(frames_path=FRAMES_VAL_PATH,
-                                       masks_path=MASKS_VAL_PATH,
-                                       fnames=os.listdir(FRAMES_VAL_PATH),
-                                       n_classes=NO_CLASSES,
-                                       input_h=INPUT_HEIGHT,
-                                       input_w=INPUT_WIDTH,
-                                       batch_size=10,
-                                       is_resizable=True)
-
-    # Save model
-    model_checkpoint_path = os.path.join(MODELS_OUT_PATH, f"unet_train_on_{date.today().strftime('%m_%d_%y')}.h5")
-
-    # callback 1: saving history
-    cb_csvlogger = CSVLogger(os.path.join(MODELS_OUT_PATH, f"unet_log_on_{date.today().strftime('%m_%d_%y')}.csv"), append=True)
-    # callback 2: saving model
-    cb_checkpoint = ModelCheckpoint(model_checkpoint_path,
-                                    monitor='dice',
-                                    verbose=1,
-                                    mode='max',
-                                    save_best_only=True,
-                                    save_weights_only=False,
-                                    period=2)  # monitor every 2 epochs
-
-
-    callback_list = [cb_checkpoint, cb_csvlogger]
+    # define where to save the model
+    model_name = f"{P_NAME}_{MODEL}_{BACKBONE}_{IN_HEIGHT}_{IN_WIDTH}_weights_{datetime.now().strftime('%d_%m_%y-%H_%M_%p')}"
+    callbacks = get_callbacks(model_path=MODELS_OUT_PATH, model_name=model_name)
 
     # Create model
-    model = UNet.build(pre_trained=False,
-                       model_path=MODELS_OUT_PATH,
-                       n_classes=NO_CLASSES,
-                       input_h=INPUT_HEIGHT,
-                       input_w=INPUT_WIDTH)
+    model = models.unet(pre_trained=False,
+                      model_path=MODELS_OUT_PATH,
+                      n_classes=CLASSES,
+                      input_h=IN_HEIGHT,
+                      input_w=IN_WIDTH,
+                      model_name=f"{MODEL}_{BACKBONE}")
 
-    history = model.fit_generator(generator=train_generator,
-                                  steps_per_epoch=32,  # train_len(850 images) = batch_size * steps_per_epoch
-                                  validation_data=val_generator,
-                                  validation_steps=20,  # val_len(150 images) = batch_size * validation_steps
-                                  epochs=200,
-                                  verbose=2,
-                                  callbacks=callback_list)
+    # Load data using generator
+    if generator:
+        train_generator = data_generator(frames_path=FRAMES_TRAIN_PATH,
+                                         masks_path=MASKS_TRAIN_PATH,
+                                         fnames=os.listdir(FRAMES_TRAIN_PATH),
+                                         n_classes=CLASSES,
+                                         input_h=IN_HEIGHT,
+                                         input_w=IN_WIDTH,
+                                         batch_size=TRAIN_BATCH_SIZE,
+                                         is_resizable=False,
+                                         training=True)
+
+        val_generator = data_generator(frames_path=FRAMES_VAL_PATH,
+                                       masks_path=MASKS_VAL_PATH,
+                                       fnames=os.listdir(FRAMES_VAL_PATH),
+                                       n_classes=CLASSES,
+                                       input_h=IN_HEIGHT,
+                                       input_w=IN_WIDTH,
+                                       batch_size=VAL_BATCH_SIZE,
+                                       is_resizable=False,
+                                       training=True)
+
+        history = model.fit_generator(generator=train_generator,
+                                      steps_per_epoch=TRAIN_STEPS_PER_EPOCH,  # train_len(800 images) = batch_size(20) * steps_per_epoch(40)
+                                      validation_data=val_generator,
+                                      validation_steps=VAL_STEPS_PER_EPOCH,  # val_len(150 images) = batch_size * validation_steps
+                                      epochs=NO_EPOCHS,
+                                      verbose=1,
+                                      callbacks=callbacks)
+
+    # Load data without generator
+    else:
+        test_frames, test_masks = data_loader(frames_path=FRAMES_TRAIN_PATH,
+                                              masks_path=MASKS_TRAIN_PATH,
+                                              input_h=IN_HEIGHT,
+                                              input_w=IN_WIDTH,
+                                              n_classes=CLASSES,
+                                              fnames=os.listdir(FRAMES_TRAIN_PATH),
+                                              is_resizable=False,
+                                              training=True)
+
+        val_frames, val_masks = data_loader(frames_path=FRAMES_VAL_PATH,
+                                              masks_path=MASKS_VAL_PATH,
+                                              input_h=IN_HEIGHT,
+                                              input_w=IN_WIDTH,
+                                              n_classes=CLASSES,
+                                              fnames=os.listdir(FRAMES_VAL_PATH),
+                                              is_resizable=False,
+                                              training=True)
+
+        history = model.fit(test_frames,
+                            test_masks,
+                            validation_data=(val_frames, val_masks),
+                            epochs=NO_EPOCHS,
+                            batch_size=TRAIN_BATCH_SIZE,
+                            verbose=1,
+                            callbacks=callbacks)
+        # Predictive probs
+

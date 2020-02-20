@@ -4,7 +4,7 @@ import cv2
 
 from src.data_generator import data_generator, data_loader
 from src.engine import get_rand_name, color_img
-from src.unet import UNet
+from src.models import UNet
 
 
 # input set
@@ -33,11 +33,11 @@ if __name__ == '__main__':
         quit(f"Directory not found")
 
     # Create model
-    model = UNet.build(pre_trained=True,
-                       model_path=UNET_MODEL_PATH,
-                       n_classes=NO_CLASSES,
-                       input_h=INPUT_HEIGHT,
-                       input_w=INPUT_WIDTH)
+    model = UNet.unet(pre_trained=True,
+                      model_path=UNET_MODEL_PATH,
+                      n_classes=NO_CLASSES,
+                      input_h=INPUT_HEIGHT,
+                      input_w=INPUT_WIDTH)
 
     # If images are loaded from generator
     if is_generator:

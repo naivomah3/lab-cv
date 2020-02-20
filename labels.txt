@@ -1,0 +1,4 @@
+background
+road
+occluded_road
+vegetation

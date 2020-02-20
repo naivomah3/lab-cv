@@ -24,7 +24,7 @@ def get_callbacks(model_path=None, model_name=None,):
         # cb_lrdecay = LearningRateScheduler(step_decay)
 
         # Callback 4: Early stopping if no improvement within 30 epochs
-        keras.callbacks.EarlyStopping(monitor='val_dice', mode='max', patience=50),
+        keras.callbacks.EarlyStopping(monitor='val_dice_multilabel', mode='max', patience=50),
 
         # Callback 5: Reduce if no improvement
         # keras.callbacks.ReduceLROnPlateau(monitor='val_loss',

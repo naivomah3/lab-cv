@@ -36,13 +36,16 @@ def color_img(frame, n_classes):
     # create channels
     mask_channels = np.zeros((frame.shape[0], frame.shape[1], n_classes)).astype("float")
     # Create color palette
-    # black = [  0,   0,   0]
-    # red =   [230,   0,   0]
-    # green = [  0, 230,   0]
-    # blue =  [  0,  38, 230]
-    R = [0, 230,   0,   0]
-    G = [0,   0, 230,  38]
-    B = [0,   0,   0, 230]
+    # black =  [  0,   0,   0]
+    # red =    [230,   0,   0]
+    # green =  [  0, 230,   0]
+    # blue =   [  0,  38, 230]
+    # violet = [222,   0, 292]
+    # yellow = [245, 255,  82]
+    R = [0, 230,   0,   0, 222, 245]
+    G = [0,   0, 230,  38,   0, 255]
+    B = [0,   0,   0, 230, 292,  82]
+
     if n_classes == 2:
         # Color labels for binary classification
         mask_channels *= 255
