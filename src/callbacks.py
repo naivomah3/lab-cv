@@ -13,7 +13,7 @@ def get_callbacks(model_path=None, model_name=None,):
                                   append=True),
         # CB 2: saving model
         keras.callbacks.ModelCheckpoint(filepath=os.path.join(model_path, model_name, f"{model_name}.h5"),
-                                        monitor='dice_multilabel',
+                                        monitor='dice',
                                         verbose=1,
                                         mode='max',
                                         save_best_only=True,
@@ -23,7 +23,7 @@ def get_callbacks(model_path=None, model_name=None,):
         # cb_lrdecay = LearningRateScheduler(step_decay)
 
         # CB 4: Early stopping if no improvement within 30 epochs
-        keras.callbacks.EarlyStopping(monitor='val_dice_multilabel', mode='max', patience=50),
+        keras.callbacks.EarlyStopping(monitor='val_dice', mode='max', patience=50),
 
         # CB 5: Reduce if no improvement
         # keras.callbacks.ReduceLROnPlateau(monitor='val_loss',
@@ -32,6 +32,5 @@ def get_callbacks(model_path=None, model_name=None,):
         #                                   min_lr=1e-5,
         #                                   verbose=1),
     ]
-
 
     return callbacks

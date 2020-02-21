@@ -17,44 +17,70 @@ def scale_input(x):
     return x
 
 # Binary DSC - IoU
-def dice(y_true, y_pred):
-    intersection = tf.reduce_sum(y_true*y_pred, axis=(1, 2))
-    union = tf.reduce_sum(y_true+y_pred, axis=(1, 2))
-    dice = 2 * intersection / (union + 1e-4)
-    return dice
+def dice(y_true, y_pred, smooth=1e-6):
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    union = K.sum(y_true_f) + K.sum(y_pred_f)
+    return (2. * intersection + smooth) / (union + smooth)
 
 def dice_loss(y_true, y_pred):
     return 1 - dice(y_true, y_pred)
 
 # Binary JSC - F1_score
-def jaccard(y_true, y_pred):
-  intersection = tf.reduce_sum(y_true*y_pred, axis=(1, 2))
-  union = tf.reduce_sum(y_true+y_pred, axis=(1, 2))
-  jaccard = intersection / (union - intersection + 1e-4)
-  return jaccard
+def jaccard(y_true, y_pred, smooth=1e-6):
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    union = K.sum(y_true_f) + K.sum(y_pred_f)
+    jaccard = intersection / (union - intersection + smooth)
+    return jaccard
 
 def jaccard_loss(y_true, y_pred):
   return 1 - jaccard(y_true, y_pred)
 
 # Multi-label DSC - IoU
-def dice_multilabel(y_true, y_pred, no_classes=4):
-    total_dice = 0
-    for index in range(no_classes):
-        total_dice -= dice(y_true[:,:,:,index], y_pred[:,:,:,index]) # [n_sample, x, y, labels/channels]
-    return total_dice
+def dice_multilabel_loss(y_true, y_pred, no_classes=4, smooth=1e-6):
+    ####Got negative dices with this
+    # total_dice = 0
+    # for index in range(no_classes):
+    #     total_dice -= dice(y_true[:,:,:, index], y_pred[:,:,:, index]) # [n_sample, x, y, labels/channels]
+    # return total_dice
+    # [b, h, w, classes]
 
-def dice_multilabel_loss(y_true, y_pred):
-    return  1 - dice_multilabel(y_true, y_pred)
+    ###Got stationary dice loss when computing again softmax out here.
+    #pred_tensor = tf.nn.softmax(y_pred) # I don't think it should again compute this activation here, this work has been done at the last layer
+    y_true_shape = tf.shape(y_true)
+
+    # [b, h*w, classes]
+    y_true = tf.reshape(y_true, [-1, y_true_shape[1] * y_true_shape[2], y_true_shape[3]])
+    y_pred = tf.reshape(y_pred, [-1, y_true_shape[1] * y_true_shape[2], y_true_shape[3]])
+
+    # [b, classes]
+    # count how many of each class are present in
+    # each image, if there are zero, then assign
+    # them a fixed weight of eps
+    counts = tf.reduce_sum(y_true, axis=1)
+    weights = 1. / (counts ** 2)
+    weights = tf.where(tf.math.is_finite(weights), weights, smooth)
+
+    multed = tf.reduce_sum(y_true * y_pred, axis=1)
+    summed = tf.reduce_sum(y_true + y_pred, axis=1)
+
+    # [b]
+    numerators = tf.reduce_sum(weights * multed, axis=-1)
+    denom = tf.reduce_sum(weights * summed, axis=-1)
+    dices = 1. - 2. * numerators / denom
+    dices = tf.where(tf.math.is_finite(dices), dices, tf.zeros_like(dices))
+    return tf.reduce_mean(dices)
 
 # Multi-label JSC - F1_score
-def jaccard_multilabel(y_true, y_pred, no_classes=4):
+# Not yet tested
+def jaccard_multilabel_loss(y_true, y_pred, no_classes=4):
     total_jaccard = 0
     for index in range(no_classes):
         total_jaccard -= jaccard(y_true[:,:,:,index], y_pred[:,:,:,index]) # [n_sample, x, y, labels/channels]
     return total_jaccard
-
-def jaccard_multilabel(y_true, y_pred, no_classes=4):
-    return 1 - jaccard_multilabel(y_true, y_pred)
 
 
 # Build U-Net: original paper
@@ -69,15 +95,11 @@ def unet(pre_trained=False,
     if pre_trained:
         if os.path.exists(model_path):
             model = load_model(model_path,
-                               custom_objects={'dice_multilabel': dice_multilabel,
-                                               'jaccard_multilabel': jaccard_multilabel,
-                                               'scale_input': scale_input}
+                               custom_objects={'dice': dice, 'jaccard': jaccard, 'scale_input': scale_input}
                                )
             model.compile(optimizer=Adam(),
                           loss=dice_multilabel_loss,
-                          metrics=[dice_multilabel,
-                                   jaccard_multilabel,
-                                   ]
+                          metrics=[dice, jaccard, ]
                           )
             model.summary()
             return model
@@ -155,12 +177,10 @@ def unet(pre_trained=False,
     # Create model
     model = Model(inputs=inBlock, outputs=outBlock, name=model_name)
     model.compile(optimizer=Adam(),
-                  loss=dice_multilabel_loss,
-                  metrics=[dice_multilabel,
-                           jaccard_multilabel,
-                           ]
+                  loss = dice_multilabel_loss,
+                  metrics=[dice, jaccard, ]
                   )
-    # Kamariya
+    # Kamariya :P
     model.summary()
 
     return model
