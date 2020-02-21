@@ -16,7 +16,7 @@ export MASKS_PREDICT_OUT_PATH=output/prediction/prediction # Where are located p
 export NO_CLASSES=3 # Number of classes
 export INPUT_HEIGHT=320 # Image input height(frames+masks/training+validation sets)
 export INPUT_WIDTH=320 # Image input width(frames+masks/training+validation sets)
-export UNET_MODEL_PATH=models/unet_train_on_11_26_2019.h5 # Where is located the model
+export WEIGHTS_PATH=models/unet_train_on_11_26_2019.h5 # Where is located the model
 # --------------------
 # Define launcher
 # --------------------

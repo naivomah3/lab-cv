@@ -22,10 +22,10 @@ def lr_decay(epoch):
     '''
     Learning rate scheduler
     '''
-    init_lr = 0.001
-    drop = 0.9
-    frequency_drop = 10.0
-    lr = init_lr * math.pow(drop, math.floor((1+epoch)/frequency_drop))
+    init_lr = 0.01
+    drop = 0.7
+    frequency_drop = 5.0
+    lr = init_lr * math.pow(drop, math.floor((1 + epoch) / frequency_drop))
     return lr
 
 

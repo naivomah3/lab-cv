@@ -22,7 +22,13 @@ def dice(y_true, y_pred, smooth=1e-6):
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
     union = K.sum(y_true_f) + K.sum(y_pred_f)
-    return (2. * intersection + smooth) / (union + smooth)
+    return (2. * intersection) / (union + smooth)
+    # y_true_shape = tf.shape(y_true)
+    # y_true = tf.reshape(y_true, [-1, y_true_shape[1] * y_true_shape[2], y_true_shape[3]])
+    # y_pred = tf.reshape(y_pred, [-1, y_true_shape[1] * y_true_shape[2], y_true_shape[3]])
+    # intersection = tf.reduce_sum(y_true * y_pred, axis=1)
+    # union = tf.reduce_sum(y_true + y_pred, axis=1)
+    # return (2. * intersection) / (union + smooth)
 
 def dice_loss(y_true, y_pred):
     return 1 - dice(y_true, y_pred)
@@ -40,7 +46,7 @@ def jaccard_loss(y_true, y_pred):
   return 1 - jaccard(y_true, y_pred)
 
 # Multi-label DSC - IoU
-def dice_multilabel_loss(y_true, y_pred, no_classes=4, smooth=1e-6):
+def dice_multilabel_loss(y_true, y_pred, no_classes=4, eps=1e-6):
     ####Got negative dices with this
     # total_dice = 0
     # for index in range(no_classes):
@@ -62,7 +68,7 @@ def dice_multilabel_loss(y_true, y_pred, no_classes=4, smooth=1e-6):
     # them a fixed weight of eps
     counts = tf.reduce_sum(y_true, axis=1)
     weights = 1. / (counts ** 2)
-    weights = tf.where(tf.math.is_finite(weights), weights, smooth)
+    weights = tf.where(tf.math.is_finite(weights), weights, eps)
 
     multed = tf.reduce_sum(y_true * y_pred, axis=1)
     summed = tf.reduce_sum(y_true + y_pred, axis=1)
@@ -85,26 +91,14 @@ def jaccard_multilabel_loss(y_true, y_pred, no_classes=4):
 
 # Build U-Net: original paper
 def unet(pre_trained=False,
-         model_path=None,
+         weights_out_path=None,
+         weights_in_path=None,  # full-path to the pre-trained weights
          n_classes=None,
          input_h=None,
          input_w=None,
          activation='elu',
          kernel_init='he_normal',
          model_name=None):
-    if pre_trained:
-        if os.path.exists(model_path):
-            model = load_model(model_path,
-                               custom_objects={'dice': dice, 'jaccard': jaccard, 'scale_input': scale_input}
-                               )
-            model.compile(optimizer=Adam(),
-                          loss=dice_multilabel_loss,
-                          metrics=[dice, jaccard, ]
-                          )
-            model.summary()
-            return model
-        else:
-            raise Exception(f'Failed to load the existing model at {model_path}')
 
     # Compile model
     inBlock = Input(shape=(input_h, input_w, 3), dtype='float32')
@@ -177,10 +171,19 @@ def unet(pre_trained=False,
     # Create model
     model = Model(inputs=inBlock, outputs=outBlock, name=model_name)
     model.compile(optimizer=Adam(),
-                  loss = dice_multilabel_loss,
+                  loss="categorical_crossentropy",
                   metrics=[dice, jaccard, ]
                   )
-    # Kamariya :P
+
+    # Load weights if pre-trained
+    if pre_trained:
+        if os.path.exists(weights_in_path):
+            model.load_weights(weights_in_path)
+        else:
+            raise Exception(f'Failed to load weights at {weights_in_path}')
+
+    # Get summary after loading weights
     model.summary()
 
     return model
+

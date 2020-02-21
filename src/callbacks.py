@@ -1,26 +1,27 @@
 import os
 import keras
 from src.utils import mk_dir
+from src.utils import lr_decay
 
-def get_callbacks(model_path=None, model_name=None,):
+def get_callbacks(weights_path=None, model_name=None, ):
 
-    if not mk_dir(model_path, model_name):
+    if not mk_dir(weights_path, model_name):
         raise Exception("Provide path to store the model")
 
     callbacks = [
-        # callback 1: saving history
-        keras.callbacks.CSVLogger(os.path.join(model_path, model_name, f"{model_name}.csv"),
+        # CB 1: saving history
+        keras.callbacks.CSVLogger(os.path.join(weights_path, model_name, f"{model_name}.csv"),
                                   append=True),
-        # CB 2: saving model
-        keras.callbacks.ModelCheckpoint(filepath=os.path.join(model_path, model_name, f"{model_name}.h5"),
+        # CB 2: saving model/weights
+        keras.callbacks.ModelCheckpoint(filepath=weights_path + model_name + model_name + "_{epoch:02d}.h5",
                                         monitor='dice',
                                         verbose=1,
                                         mode='max',
-                                        save_best_only=True,
+                                        #save_best_only=True,
                                         save_weights_only=True,
-                                        period=2),  # monitor every 2 epochs
+                                        period=1),  # save weights each epoch
         # CB 3: LR decay
-        # cb_lrdecay = LearningRateScheduler(step_decay)
+        # keras.callbacks.LearningRateScheduler(lr_decay),
 
         # CB 4: Early stopping if no improvement within 30 epochs
         keras.callbacks.EarlyStopping(monitor='val_dice', mode='max', patience=50),

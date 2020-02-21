@@ -4,7 +4,7 @@ import cv2
 
 from src.data_generator import data_generator, data_loader
 from src.engine import get_rand_name, color_img
-from src.models import UNet
+from src import models
 
 
 # input set
@@ -15,7 +15,7 @@ FRAMES_TEST_OUT_PATH = os.environ.get("FRAMES_TEST_OUT_PATH")
 MASKS_TEST_OUT_PATH = os.environ.get("MASKS_TEST_OUT_PATH")
 MASKS_PREDICT_OUT_PATH = os.environ.get("MASKS_PREDICT_OUT_PATH")
 # Model path
-UNET_MODEL_PATH = os.environ.get("UNET_MODEL_PATH")
+WEIGHTS_PATH = os.environ.get("WEIGHTS_PATH")
 # Number of classes [2:'binary', >2:'multilabel']
 NO_CLASSES = int(os.environ.get("NO_CLASSES"))
 # Frames&masks input dimension
@@ -27,17 +27,17 @@ if __name__ == '__main__':
     test_frames = None
     test_masks = None
 
-    if not os.path.isfile(UNET_MODEL_PATH):
-        quit(f"Model file not found {UNET_MODEL_PATH}")
+    if not os.path.isfile(WEIGHTS_PATH):
+        quit(f"Model file not found {WEIGHTS_PATH}")
     if not os.path.isdir(FRAMES_TEST_IN_PATH) or not os.path.isdir(MASKS_TEST_IN_PATH):
         quit(f"Directory not found")
 
     # Create model
-    model = UNet.unet(pre_trained=True,
-                      model_path=UNET_MODEL_PATH,
-                      n_classes=NO_CLASSES,
-                      input_h=INPUT_HEIGHT,
-                      input_w=INPUT_WIDTH)
+    model = models.unet(pre_trained=True,
+                        weights_out_path=WEIGHTS_PATH,
+                        n_classes=NO_CLASSES,
+                        input_h=INPUT_HEIGHT,
+                        input_w=INPUT_WIDTH)
 
     # If images are loaded from generator
     if is_generator:

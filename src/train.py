@@ -13,7 +13,8 @@ MASKS_VAL_PATH = os.environ.get("MASKS_VAL_PATH")
 MODEL = os.environ.get("MODEL")
 BACKBONE = os.environ.get("BACKBONE")
 
-MODELS_OUT_PATH = os.environ.get("MODELS_OUT_PATH")
+WEIGHTS_OUT_PATH = os.environ.get("WEIGHTS_OUT_PATH")
+WEIGHTS_IN_PATH = os.environ.get("WEIGHTS_IN_PATH") # if loading pre-trained weights
 
 # Batch-size
 TRAIN_BATCH_SIZE = int(os.environ.get("TRAIN_BATCH_SIZE"))
@@ -42,15 +43,16 @@ if __name__ == '__main__':
 
     # define where to save the model
     model_name = f"{P_NAME}_{MODEL}_{BACKBONE}_{IN_HEIGHT}_{IN_WIDTH}_weights_{datetime.now().strftime('%d_%m_%y-%H_%M_%p')}"
-    callbacks = get_callbacks(model_path=MODELS_OUT_PATH, model_name=model_name)
+    callbacks = get_callbacks(weights_path=WEIGHTS_OUT_PATH, model_name=model_name)
 
     # Create model
     model = models.unet(pre_trained=False,
-                      model_path=MODELS_OUT_PATH,
-                      n_classes=CLASSES,
-                      input_h=IN_HEIGHT,
-                      input_w=IN_WIDTH,
-                      model_name=f"{MODEL}_{BACKBONE}")
+                        weights_out_path=WEIGHTS_OUT_PATH,
+                        #weights_in_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
+                        n_classes=CLASSES,
+                        input_h=IN_HEIGHT,
+                        input_w=IN_WIDTH,
+                        model_name=f"{MODEL}_{BACKBONE}")
 
     # Load data using generator
     if generator:
