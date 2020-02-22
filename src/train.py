@@ -12,10 +12,7 @@ MASKS_VAL_PATH = os.environ.get("MASKS_VAL_PATH")
 # MODEL&BACKBONE
 MODEL = os.environ.get("MODEL")
 BACKBONE = os.environ.get("BACKBONE")
-
 WEIGHTS_OUT_PATH = os.environ.get("WEIGHTS_OUT_PATH")
-WEIGHTS_IN_PATH = os.environ.get("WEIGHTS_IN_PATH") # if loading pre-trained weights
-
 # Batch-size
 TRAIN_BATCH_SIZE = int(os.environ.get("TRAIN_BATCH_SIZE"))
 VAL_BATCH_SIZE = int(os.environ.get("VAL_BATCH_SIZE"))

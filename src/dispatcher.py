@@ -1,13 +1,13 @@
 import os
 from src import models
 
-
+WEIGHTS_IN_PATH = os.environ.get("WEIGHTS_IN_PATH") # should be the fullpath of the pre-trained weights
 IN_HEIGHT = int(os.environ.get("IN_HEIGHT"))
 IN_WIDTH = int(os.environ.get("IN_WIDTH"))
 LABELS_FILE = os.environ.get("LABELS_FILE")
 MODEL = os.environ.get("MODEL")
 BACKBONE = os.environ.get("BACKBONE")
-is_pretrained = False if os.environ.get("BACKBONE") == "False" else True
+is_pretrained = False if os.environ.get("PRE_TRAINED") == "False" else True
 with open(LABELS_FILE, 'r') as file:
     CLASSES = len(list(file))
 if not CLASSES:

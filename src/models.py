@@ -217,7 +217,7 @@ def bcd_unet_d3(pre_trained=False,  # if True, set weights_path
     dropB3d = Dropout(0.5)(convB3d)
     poolB3d = MaxPooling2D(pool_size=(2, 2))(convB3d)
 
-    # =============================================== BOOTLENECK =================================================
+    # =============================================== BOTTLENECK =================================================
     # Bottleneck - Block D1
     convBnd1 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(poolB3d)
     convBnd1 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convBnd1)
@@ -323,7 +323,7 @@ def bcd_unet_d1(pre_trained=False,  # if True, set weights_path
     poolB3d = MaxPooling2D(pool_size=(2, 2))(convB3d)
 
 
-    # =============================================== BOOTLENECK =================================================
+    # =============================================== BOTTLENECK =================================================
     # Bottleneck - Block D1
     convBnd1 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(poolB3d)
     convBnd1 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convBnd1)
