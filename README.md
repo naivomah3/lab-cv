@@ -1,12 +1,15 @@
 #### Summary
 This repository is holding experiments related to my M.Tech thesis. <br>
-This project is aiming to address the road extraction problem in end-to-end fashion. Our dataset is a set of aerial images taken from UAV(drones) from local areas within the NIT Rourkela campus. Throughout the experiments, we are benchmarking different state-of-the-art models and taking advantages to address our problem. The main objective of this project is to build an effective CNN model, being able to distinguish roads from occlusion and background
+The project is aiming to address the road extraction problem in end-to-end fashion. 
+Our dataset is a set of aerial images taken from UAV(drones) from local areas within the NIT Rourkela campus. 
+Throughout the experiments, we are benchmarking different state-of-the-art models and taking advantages to address our problem. The main objective of this project is to build an effective CNN model, being able to distinguish roads from occlusion and background
 and able to generalize to later extension as well as to build our own dataset. 
 
-> **Please note:** the development is undergoing and details will gradually be provided below. 
+> **Please note:** the development is undergoing and details will 
+> gradually be provided below. 
 
 ## Prerequisites
-There are a few but important prerequisites that (may) need to be set before making any change. Note that everything has been tested with `python==3.6.7` 
+There are a few but important prerequisites that (may) need to be installed before making any change. Note that the code has been tested with `python==3.6.7` 
 
 ### Create new [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows.html) environment 
 ```bash
@@ -19,7 +22,9 @@ pip install -r requirements.txt
 ```
 
 ## Directory structure
-* `/input` contains images/frames and their respective masks within each set(training/validation/testing). `masks` and `testing` set would be a 2D matrix of dimension `(height x width x 1)` mapping the spatial distribution of each class/label. As an example, please find here 
+* `/input` contains images/frames and their respective masks within each 
+set(training/validation/testing). Within `mask`, the ground truth set would be a 2D matrix of dimension `(height x width)` and each pixel's value maps the spatial distribution of each respective label. 
+As an example, please find [here](https://github.com/naivomah3/lab-cv/blob/master/notebooks/image-preprocessing.ipynb)
 
 ```bash
 /input
@@ -56,5 +61,6 @@ sh predict.sh
 ##### Major update
 | Timeline | Comments |
 | -------- | -------- |
-| 18-12-2019 | Add U-Net model |
+| 18-12-2019 | Add U-Net model    | 
+| 22-02-2020 | Add BCDU-Net model |
 
