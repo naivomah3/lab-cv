@@ -1,8 +1,9 @@
 import os
 from datetime import datetime
 from src.data_generator import data_generator, data_loader
-from src.dispatcher import models
 from src.callbacks import get_callbacks
+from src.models import bcd_unet_d3
+#from src import dispatcher
 
 # Load all environment variables
 FRAMES_TRAIN_PATH = os.environ.get("FRAMES_TRAIN_PATH")
@@ -13,6 +14,7 @@ MASKS_VAL_PATH = os.environ.get("MASKS_VAL_PATH")
 MODEL = os.environ.get("MODEL")
 BACKBONE = os.environ.get("BACKBONE")
 WEIGHTS_OUT_PATH = os.environ.get("WEIGHTS_OUT_PATH")
+WEIGHTS_IN_PATH = os.environ.get("WEIGHTS_IN_PATH")
 # Batch-size
 TRAIN_BATCH_SIZE = int(os.environ.get("TRAIN_BATCH_SIZE"))
 VAL_BATCH_SIZE = int(os.environ.get("VAL_BATCH_SIZE"))
@@ -42,8 +44,13 @@ if __name__ == '__main__':
     model_name = f"{P_NAME}_{MODEL}_{BACKBONE}_{IN_HEIGHT}_{IN_WIDTH}_weights_{datetime.now().strftime('%d_%m_%y-%H_%M_%p')}"
     callbacks = get_callbacks(weights_path=WEIGHTS_OUT_PATH, model_name=model_name)
 
-    # Load model from dispatcher
-    model = models[MODEL]
+    # Load model from dispatcher not yet working/
+    model = bcd_unet_d3(pre_trained=False,
+                          #weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
+                          n_classes=CLASSES,
+                          input_h=IN_HEIGHT,
+                          input_w=IN_WIDTH,
+                          model_name=f"{MODEL}_{BACKBONE}")
 
     # Load data using generator
     if generator:
