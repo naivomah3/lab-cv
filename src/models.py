@@ -1,11 +1,14 @@
 import os
 import tensorflow as tf
 from tensorflow.keras import backend as K
-from keras.models import Model, load_model
-from keras.layers import Conv2D, Input, MaxPooling2D, Conv2DTranspose, Dropout, Lambda, concatenate, BatchNormalization
+from keras.models import Model  # Functional API
+from keras.layers import (
+        Conv2D, Input, MaxPooling2D,
+        Conv2DTranspose, Dropout, Lambda,
+        concatenate, BatchNormalization, Activation,
+        Reshape, ConvLSTM2D)
 from keras.optimizers import Adam
 import numpy as np
-
 
 def scale_input(x):
     '''pre-processing: scaling/normalization
@@ -29,7 +32,6 @@ def dice(y_true, y_pred, smooth=1e-6):
     # intersection = tf.reduce_sum(y_true * y_pred, axis=1)
     # union = tf.reduce_sum(y_true + y_pred, axis=1)
     # return (2. * intersection) / (union + smooth)
-
 def dice_loss(y_true, y_pred):
     return 1 - dice(y_true, y_pred)
 
@@ -41,7 +43,6 @@ def jaccard(y_true, y_pred, smooth=1e-6):
     union = K.sum(y_true_f) + K.sum(y_pred_f)
     jaccard = intersection / (union - intersection + smooth)
     return jaccard
-
 def jaccard_loss(y_true, y_pred):
   return 1 - jaccard(y_true, y_pred)
 
@@ -90,9 +91,8 @@ def jaccard_multilabel_loss(y_true, y_pred, no_classes=4):
 
 
 # Build U-Net: original paper
-def unet(pre_trained=False,
-         weights_out_path=None,
-         weights_in_path=None,  # full-path to the pre-trained weights
+def unet(pre_trained=False,  # if True, set weights_path
+         weights_path=None,  # full-path to the pre-trained weights
          n_classes=None,
          input_h=None,
          input_w=None,
@@ -177,13 +177,214 @@ def unet(pre_trained=False,
 
     # Load weights if pre-trained
     if pre_trained:
-        if os.path.exists(weights_in_path):
-            model.load_weights(weights_in_path)
+        if os.path.exists(weights_path):
+            model.load_weights(weights_path)
         else:
-            raise Exception(f'Failed to load weights at {weights_in_path}')
+            raise Exception(f'Failed to load weights at {weights_path}')
 
     # Get summary after loading weights
     model.summary()
 
     return model
 
+# Build Bi-Directional ConvLSTM U-Net with Densely Connected Convolutions
+# Dense Block = 3
+def bcd_unet_d3(pre_trained=False,  # if True, set weights_path
+         weights_path=None,  # full-path to the pre-trained weights
+         n_classes=None,
+         input_h=None,
+         input_w=None,
+         activation='elu',
+         kernel_init='he_normal',
+         model_name=None):
+
+    # Compile model
+    inBlock = Input(shape=(input_h, input_w, 3), dtype='float32')
+    # Lambda layer: scale input before feeding to the network
+    inScaled = Lambda(lambda x: scale_input(x))(inBlock)
+    # =============================================== ENCODING ==================================================
+    # Block 1d
+    convB1d = Conv2D(64, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(inScaled)
+    convB1d = Conv2D(64, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB1d)
+    poolB1d = MaxPooling2D(pool_size=(2, 2))(convB1d)
+    # Block 2d
+    convB2d = Conv2D(128, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(poolB1d)
+    convB2d = Conv2D(128, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB2d)
+    poolB2d = MaxPooling2D(pool_size=(2, 2))(convB2d)
+    # Block 3d
+    convB3d = Conv2D(256, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(poolB2d)
+    convB3d = Conv2D(256, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB3d)
+    dropB3d = Dropout(0.5)(convB3d)
+    poolB3d = MaxPooling2D(pool_size=(2, 2))(convB3d)
+
+    # =============================================== BOOTLENECK =================================================
+    # Bottleneck - Block D1
+    convBnd1 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(poolB3d)
+    convBnd1 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convBnd1)
+    dropBnd1 = Dropout(0.5)(convBnd1)
+    # Bottlenbeck - Block D2
+    convBnd2 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(dropBnd1)
+    convBnd2 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convBnd2)
+    dropBnd2 = Dropout(0.5)(convBnd2)
+    # Bottlenbeck - Block D3
+    merge_d1_d2 = concatenate([dropBnd1, dropBnd2], axis=3)
+    convBnd3 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(merge_d1_d2)
+    convBnd3 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convBnd3)
+    dropBnd3 = Dropout(0.5)(convBnd3)
+
+    # =============================================== DECODING ==================================================
+    # Block 4u
+    convB4u = Conv2DTranspose(256, kernel_size=2, strides=2, kernel_regularizer=kernel_init, padding='same')(dropBnd3)
+    convB4u = BatchNormalization(axis=3)(convB4u)
+    convB4u = Activation(activation)(convB4u)
+    dropB3d = Reshape(target_shape=(1, np.int32(input_h/4), np.int32(input_h/4), 256))(dropB3d) # just to make sure about shape, but I think the size is already okay :P
+    convB4u = Reshape(target_shape=(1, np.int32(input_h/4), np.int32(input_h/4), 256))(convB4u)
+    merge_3d_4u = concatenate([dropB3d, convB4u], axis=1)
+    merge_3d_4u = ConvLSTM2D(128, kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer=kernel_init)(merge_3d_4u)
+    convB4u = Conv2D(256, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(merge_3d_4u)
+    convB4u = Conv2D(256, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB4u)
+
+    # Block 3u
+    convB3u = Conv2DTranspose(128, (2, 2), strides=(2, 2), kernel_initializer=kernel_init, padding='same')(convB4u)
+    convB3u = BatchNormalization(axis=3)(convB3u)
+    convB3u = Activation(activation)(convB3u)
+    convB2d = Reshape(target_shape=(1, np.int32(input_h/2), np.int32(input_h/2), 128))(convB2d)
+    convB3u = Reshape(target_shape=(1, np.int32(input_h/2), np.int32(input_h/2), 128))(convB3u)
+    merge_2d_3u = concatenate([convB2d, convB3u], axis=1)
+    merge_2d_3u = ConvLSTM2D(128, kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer=kernel_init)(merge_2d_3u)
+    convB3u = Conv2D(128, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(merge_2d_3u)
+    convB3u = Conv2D(128, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB3u)
+
+    # Block B2u
+    convB2u = Conv2DTranspose(64, (2, 2), strides=(2, 2), kernel_initializer=kernel_init, padding='same')(convB3u)
+    convB2u = BatchNormalization(axis=3)(convB2u)
+    convB2u = Activation(activation)(convB2u)
+    convB1d = Reshape(target_shape=(1, np.int32(input_h), np.int32(input_h), 128))(convB1d)
+    convB2u = Reshape(target_shape=(1, np.int32(input_h), np.int32(input_h), 128))(convB2u)
+    merge_1d_2u = concatenate([convB1d, convB2u], axis=1)
+    merge_1d_2u = ConvLSTM2D(128, kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer=kernel_init)(merge_1d_2u)
+    convB2u = Conv2D(64, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(merge_1d_2u)
+    convB2u = Conv2D(64, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB2u)
+
+    # ================================================== OUTPUT =====================================================
+    # Output layer
+    if n_classes == 2:
+        outBlock = Conv2D(1, (1, 1), activation='sigmoid', padding='same')(convB2u)
+    else:
+        outBlock = Conv2D(n_classes, (1, 1), activation='softmax', padding='same')(convB2u)
+
+    # Create model
+    model = Model(inputs=inBlock, outputs=outBlock, name=model_name)
+    model.compile(optimizer=Adam(),
+                  loss="categorical_crossentropy",
+                  metrics=[dice, jaccard, ]
+                  )
+
+    # Load weights if pre-trained
+    if pre_trained:
+        if os.path.exists(weights_path):
+            model.load_weights(weights_path)
+        else:
+            raise Exception(f'Failed to load weights at {weights_path}')
+
+    # Get summary after loading weights
+    model.summary()
+
+    return model
+
+# Build Bi-Directional ConvLSTM U-Net with Densely Connected Convolutions
+# Dense Block = 1
+def bcd_unet_d1(pre_trained=False,  # if True, set weights_path
+         weights_path=None,  # full-path to the pre-trained weights
+         n_classes=None,
+         input_h=None,
+         input_w=None,
+         activation='elu',
+         kernel_init='he_normal',
+         model_name=None):
+
+    # Compile model
+    inBlock = Input(shape=(input_h, input_w, 3), dtype='float32')
+    # Lambda layer: scale input before feeding to the network
+    inScaled = Lambda(lambda x: scale_input(x))(inBlock)
+    # =============================================== ENCODING ==================================================
+    # Block 1d
+    convB1d = Conv2D(64, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(inScaled)
+    convB1d = Conv2D(64, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB1d)
+    poolB1d = MaxPooling2D(pool_size=(2, 2))(convB1d)
+    # Block 2d
+    convB2d = Conv2D(128, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(poolB1d)
+    convB2d = Conv2D(128, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB2d)
+    poolB2d = MaxPooling2D(pool_size=(2, 2))(convB2d)
+    # Block 3d
+    convB3d = Conv2D(256, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(poolB2d)
+    convB3d = Conv2D(256, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB3d)
+    dropB3d = Dropout(0.5)(convB3d)
+    poolB3d = MaxPooling2D(pool_size=(2, 2))(convB3d)
+
+
+    # =============================================== BOOTLENECK =================================================
+    # Bottleneck - Block D1
+    convBnd1 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(poolB3d)
+    convBnd1 = Conv2D(512, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convBnd1)
+    dropBnd1 = Dropout(0.5)(convBnd1)
+
+    # =============================================== DECODING ==================================================
+    # Block 4u
+    convB4u = Conv2DTranspose(256, kernel_size=2, strides=2, kernel_regularizer=kernel_init, padding='same')(dropBnd1)
+    convB4u = BatchNormalization(axis=3)(convB4u)
+    convB4u = Activation(activation)(convB4u)
+    dropB3d = Reshape(target_shape=(1, np.int32(input_h/4), np.int32(input_h/4), 256))(dropB3d) # just to make sure about shape, but I think the size is already okay :P
+    convB4u = Reshape(target_shape=(1, np.int32(input_h/4), np.int32(input_h/4), 256))(convB4u)
+    merge_3d_4u = concatenate([dropB3d, convB4u], axis=1)
+    merge_3d_4u = ConvLSTM2D(128, kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer=kernel_init)(merge_3d_4u)
+    convB4u = Conv2D(256, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(merge_3d_4u)
+    convB4u = Conv2D(256, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB4u)
+
+    # Block 3u
+    convB3u = Conv2DTranspose(128, (2, 2), strides=(2, 2), kernel_initializer=kernel_init, padding='same')(convB4u)
+    convB3u = BatchNormalization(axis=3)(convB3u)
+    convB3u = Activation(activation)(convB3u)
+    convB2d = Reshape(target_shape=(1, np.int32(input_h/2), np.int32(input_h/2), 128))(convB2d)
+    convB3u = Reshape(target_shape=(1, np.int32(input_h/2), np.int32(input_h/2), 128))(convB3u)
+    merge_2d_3u = concatenate([convB2d, convB3u], axis=1)
+    merge_2d_3u = ConvLSTM2D(128, kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer=kernel_init)(merge_2d_3u)
+    convB3u = Conv2D(128, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(merge_2d_3u)
+    convB3u = Conv2D(128, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB3u)
+
+    # Block B2u
+    convB2u = Conv2DTranspose(64, (2, 2), strides=(2, 2), kernel_initializer=kernel_init, padding='same')(convB3u)
+    convB2u = BatchNormalization(axis=3)(convB2u)
+    convB2u = Activation(activation)(convB2u)
+    convB1d = Reshape(target_shape=(1, np.int32(input_h), np.int32(input_h), 128))(convB1d)
+    convB2u = Reshape(target_shape=(1, np.int32(input_h), np.int32(input_h), 128))(convB2u)
+    merge_1d_2u = concatenate([convB1d, convB2u], axis=1)
+    merge_1d_2u = ConvLSTM2D(128, kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer=kernel_init)(merge_1d_2u)
+    convB2u = Conv2D(64, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(merge_1d_2u)
+    convB2u = Conv2D(64, (3, 3), activation=activation, kernel_initializer=kernel_init, padding='same')(convB2u)
+
+    # ================================================== OUTPUT =====================================================
+    # Output layer
+    if n_classes == 2:
+        outBlock = Conv2D(1, (1, 1), activation='sigmoid', padding='same')(convB2u)
+    else:
+        outBlock = Conv2D(n_classes, (1, 1), activation='softmax', padding='same')(convB2u)
+
+    # Create model
+    model = Model(inputs=inBlock, outputs=outBlock, name=model_name)
+    model.compile(optimizer=Adam(),
+                  loss="categorical_crossentropy",
+                  metrics=[dice, jaccard, ]
+                  )
+
+    # Load weights if pre-trained
+    if pre_trained:
+        if os.path.exists(weights_path):
+            model.load_weights(weights_path)
+        else:
+            raise Exception(f'Failed to load weights at {weights_path}')
+
+    # Get summary after loading weights
+    model.summary()
+
+    return model

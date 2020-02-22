@@ -13,7 +13,7 @@ def get_callbacks(weights_path=None, model_name=None, ):
         keras.callbacks.CSVLogger(os.path.join(weights_path, model_name, f"{model_name}.csv"),
                                   append=True),
         # CB 2: saving model/weights
-        keras.callbacks.ModelCheckpoint(filepath=weights_path + model_name + model_name + "_{epoch:02d}.h5",
+        keras.callbacks.ModelCheckpoint(filepath=os.path.join(weights_path, model_name, model_name) + "_{epoch:02d}.h5",
                                         monitor='dice',
                                         verbose=1,
                                         mode='max',
@@ -24,7 +24,7 @@ def get_callbacks(weights_path=None, model_name=None, ):
         # keras.callbacks.LearningRateScheduler(lr_decay),
 
         # CB 4: Early stopping if no improvement within 30 epochs
-        keras.callbacks.EarlyStopping(monitor='val_dice', mode='max', patience=50),
+        keras.callbacks.EarlyStopping(monitor='val_dice', mode='max', patience=20),
 
         # CB 5: Reduce if no improvement
         # keras.callbacks.ReduceLROnPlateau(monitor='val_loss',

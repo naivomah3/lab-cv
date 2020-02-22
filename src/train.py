@@ -47,8 +47,7 @@ if __name__ == '__main__':
 
     # Create model
     model = models.unet(pre_trained=False,
-                        weights_out_path=WEIGHTS_OUT_PATH,
-                        #weights_in_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
+                        #weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
                         n_classes=CLASSES,
                         input_h=IN_HEIGHT,
                         input_w=IN_WIDTH,

@@ -16,11 +16,16 @@ MASKS_TEST_OUT_PATH = os.environ.get("MASKS_TEST_OUT_PATH")
 MASKS_PREDICT_OUT_PATH = os.environ.get("MASKS_PREDICT_OUT_PATH")
 # Model path
 WEIGHTS_PATH = os.environ.get("WEIGHTS_PATH")
-# Number of classes [2:'binary', >2:'multilabel']
-NO_CLASSES = int(os.environ.get("NO_CLASSES"))
 # Frames&masks input dimension
 INPUT_HEIGHT = int(os.environ.get("INPUT_HEIGHT"))
 INPUT_WIDTH = int(os.environ.get("INPUT_WIDTH"))
+
+# load file containing list of classes
+LABELS_FILE = os.environ.get("LABELS_FILE")
+with open(LABELS_FILE, 'r') as file:
+    CLASSES = len(list(file))
+if not CLASSES:
+    raise Exception("Unable to load label file")
 
 if __name__ == '__main__':
     is_generator = False
@@ -34,8 +39,8 @@ if __name__ == '__main__':
 
     # Create model
     model = models.unet(pre_trained=True,
-                        weights_out_path=WEIGHTS_PATH,
-                        n_classes=NO_CLASSES,
+                        weights_path=WEIGHTS_PATH,
+                        n_classes=CLASSES,
                         input_h=INPUT_HEIGHT,
                         input_w=INPUT_WIDTH)
 
@@ -46,7 +51,7 @@ if __name__ == '__main__':
                                              fnames=os.listdir(MASKS_TEST_IN_PATH),
                                              input_h=INPUT_HEIGHT,
                                              input_w=INPUT_WIDTH,
-                                             n_classes=NO_CLASSES,
+                                             n_classes=CLASSES,
                                              batch_size=10,
                                              is_resizable=True)
         predicted_masks = model.predict_generator(test_data_generated, steps=15)
@@ -57,14 +62,15 @@ if __name__ == '__main__':
                                               masks_path=MASKS_TEST_IN_PATH,
                                               input_h=INPUT_HEIGHT,
                                               input_w=INPUT_WIDTH,
-                                              n_classes=NO_CLASSES,
+                                              n_classes=CLASSES,
                                               fnames=os.listdir(MASKS_TEST_IN_PATH),
                                               is_resizable=True)
         # Predictive probs
         predicted_masks = model.predict(test_frames, batch_size=10)
 
     # Map mask & predicted mask as 2-D matrix of the respective class
-    # dim: [n_samples, h, w, 1]
+    # dim binary: [n_samples, h, w, 1]
+    # dim multi label: [n_samples, h, w, n_classes]
     test_masks = np.argmax(test_masks, axis=3)
     predicted_masks = np.argmax(predicted_masks, axis=3)
 
@@ -76,10 +82,10 @@ if __name__ == '__main__':
                     test_frames[i])
         # Save ground truth mask
         cv2.imwrite(os.path.join(MASKS_TEST_OUT_PATH, fname + '.png'),
-                    color_img(test_masks[i], NO_CLASSES))
+                    color_img(test_masks[i], CLASSES))
         # Save predicted mask
         cv2.imwrite(os.path.join(MASKS_PREDICT_OUT_PATH, fname + '.png'),
-                    color_img(predicted_masks[i], NO_CLASSES))
+                    color_img(predicted_masks[i], CLASSES))
 
 
     # Evaluation
