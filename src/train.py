@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from src.data_generator import data_generator, data_loader
-from src import models
+from src.dispatcher import models
 from src.callbacks import get_callbacks
 
 # Load all environment variables
@@ -45,13 +45,8 @@ if __name__ == '__main__':
     model_name = f"{P_NAME}_{MODEL}_{BACKBONE}_{IN_HEIGHT}_{IN_WIDTH}_weights_{datetime.now().strftime('%d_%m_%y-%H_%M_%p')}"
     callbacks = get_callbacks(weights_path=WEIGHTS_OUT_PATH, model_name=model_name)
 
-    # Create model
-    model = models.unet(pre_trained=False,
-                        #weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
-                        n_classes=CLASSES,
-                        input_h=IN_HEIGHT,
-                        input_w=IN_WIDTH,
-                        model_name=f"{MODEL}_{BACKBONE}")
+    # Load model from dispatcher
+    model = models[MODEL]
 
     # Load data using generator
     if generator:

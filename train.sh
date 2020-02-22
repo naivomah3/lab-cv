@@ -17,9 +17,10 @@ export IN_HEIGHT=320
 export IN_WIDTH=320 #
 export WEIGHTS_OUT_PATH=models/
 export WEIGHTS_IN_PATH=models/road_seg_unet_vgg16_320_320_weights_21_02_20-18_22_PM/road_seg_unet_vgg16_320_320_weights_21_02_20-18_22_PM.h5     # Full path is loading pre-trained weights
+export PRE_TRAINED=False
 export PROBLEM=road_seg
 export LABELS_FILE=labels.txt
-export MODEL=unet
+export MODEL=bcd_unet_d3
 export BACKBONE=vgg16
 # --------------------
 # Define script loader
