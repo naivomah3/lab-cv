@@ -1,5 +1,5 @@
 import os
-from src import models as net
+from src.models import UNet, BCD_UNet_D3, FC_DenseNet
 
 WEIGHTS_IN_PATH = os.environ.get("WEIGHTS_IN_PATH") # should be the fullpath of the pre-trained weights
 IN_HEIGHT = int(os.environ.get("IN_HEIGHT"))
@@ -15,23 +15,30 @@ if not CLASSES:
 
 
 MODELS = {
-    'unet': net.unet(pre_trained=is_pretrained,
-                        # weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
-                        n_classes=CLASSES,
-                        input_h=IN_HEIGHT,
-                        input_w=IN_WIDTH,
-                        model_name=f"{MODEL}_{BACKBONE}"),
+    'unet': UNet(pre_trained=is_pretrained,
+                weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
+                n_classes=CLASSES,
+                input_h=IN_HEIGHT,
+                input_w=IN_WIDTH,
+                model_name=f"{MODEL}"),
 
-    'bcd_unet_d1': net.bcd_unet_d1(pre_trained=is_pretrained,
-                                        # weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
-                                        n_classes=CLASSES,
-                                        input_h=IN_HEIGHT,
-                                        input_w=IN_WIDTH,
-                                        model_name=f"{MODEL}_{BACKBONE}"),
-    'bcd_unet_d3': net.bcd_unet_d3(pre_trained=is_pretrained,
-                                      # weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
-                                      n_classes=CLASSES,
-                                      input_h=IN_HEIGHT,
-                                      input_w=IN_WIDTH,
-                                      model_name=f"{MODEL}_{BACKBONE}"),
+    'bcd_unet_d3': BCD_UNet_D3(pre_trained=is_pretrained,
+                                weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
+                                n_classes=CLASSES,
+                                input_h=IN_HEIGHT,
+                                input_w=IN_WIDTH,
+                                model_name=f"{MODEL}"),
+    # 'bcd_unet_d3': net.bcd_unet_d3(pre_trained=is_pretrained,
+    #                                   # weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
+    #                                   n_classes=CLASSES,
+    #                                   input_h=IN_HEIGHT,
+    #                                   input_w=IN_WIDTH,
+    #                                   model_name=f"{MODEL}_{BACKBONE}"),
+    'fcn_densenet_103': FC_DenseNet(pre_trained=is_pretrained,
+                                weights_path=WEIGHTS_IN_PATH, # uncomment if load pre-trained weights
+                                n_classes=CLASSES,
+                                input_h=IN_HEIGHT,
+                                input_w=IN_WIDTH,
+                                model_name=f"{MODEL}"),
+
     }

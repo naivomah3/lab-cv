@@ -20,11 +20,11 @@ def get_callbacks(weights_path=None, model_name=None, ):
                                         #save_best_only=True,
                                         save_weights_only=True,
                                         period=1),  # save weights each epoch
-        # CB 3: LR decay
-        # keras.callbacks.LearningRateScheduler(lr_decay),
-
-        # CB 4: Early stopping if no improvement within 30 epochs
+        # CB 3: Early stopping if no improvement within 20 epochs
         keras.callbacks.EarlyStopping(monitor='val_dice', mode='max', patience=20),
+
+        # CB 4: LR decay
+        # keras.callbacks.LearningRateScheduler(lr_decay),
 
         # CB 5: Reduce if no improvement
         # keras.callbacks.ReduceLROnPlateau(monitor='val_loss',
