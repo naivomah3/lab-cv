@@ -61,7 +61,7 @@ sh predict.sh
 ##### Major update
 | Timeline | Comments |  Reference |
 | -------- | -------- | -----------| 
-| 18-12-2019 | Add U-Net model    | [paper](https://arxiv.org/abs/1505.04597) 
-| 22-02-2020 | Add BCDU-Net model | [paper](https://arxiv.org/abs/1909.00166)
-| 29-02-2020 | FC-DenseNet model  | [paper](https://arxiv.org/abs/1611.09326)
+| 18-12-2019 | add U-Net model    | [paper](https://arxiv.org/abs/1505.04597) 
+| 22-02-2020 | add BCDU-Net model | [paper](https://arxiv.org/abs/1909.00166)
+| 29-02-2020 | add FC-DenseNet model  | [paper](https://arxiv.org/abs/1611.09326)
 

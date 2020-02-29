@@ -121,7 +121,6 @@ class UNet:
         return model
 
 
-
 class BCD_UNet_D3:
     def __init__(self,
                  pre_trained=False,  # if True, set weights_path
@@ -236,7 +235,6 @@ class BCD_UNet_D3:
         return model
 
 
-
 class BCD_UNet_D1:
     def __init__(self,
                  pre_trained=False,  # if True, set weights_path
@@ -342,7 +340,6 @@ class BCD_UNet_D1:
         return model
 
 
-
 class FC_DenseNet:
     def __init__(self,
                  pre_trained=False,  # if True, set weights_path
@@ -410,7 +407,7 @@ class FC_DenseNet:
         stack = Conv2D(self.filters, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last')(input_layer)
 
         # ======================================== ENCODER ========================================
-        # To save the output of each dense block of the down-sampling path to later concate to the transition up sampling
+        # To save the output of each dense block of the down-sampling path to later concatenate to the transition up
         skip_connections = list()
         for i in range(self.n_pool):
             # Dense block
@@ -438,7 +435,7 @@ class FC_DenseNet:
         skip_connections = skip_connections[::-1]
 
         for j in range(self.n_pool):
-            # Update filters
+            # Updating filters is specific for each variant
             if self.model_name == 'fcn_densenet_56' or self.model_name == 'fcn_densenet_67':
                 keep_filters = self.n_layers_per_dense_block * self.growth_rate
             else:
