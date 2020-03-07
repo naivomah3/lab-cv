@@ -8,6 +8,15 @@ def get_rand_name(size=30, chars=string.ascii_letters + string.digits):
     '''
     return ''.join(random.choice(chars) for x in range(size))
 
+def scale_input(x):
+    '''pre-processing: scaling/normalization
+    rtype: x = {(x / 255) - 0.5} * 2 <- to be proved
+    '''
+    x /= 255.
+    # x -= 0.5
+    # x *= 2.
+    return x
+
 def unison_shuffled(a, b):
     '''
     a & b: 2 numpy arrays
