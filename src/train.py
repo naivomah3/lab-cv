@@ -47,6 +47,7 @@ if __name__ == '__main__':
     network = MODELS[MODEL]
     model = network.build()
     model.summary()
+    exit()
 
 
     # Load data using generator
