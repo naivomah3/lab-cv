@@ -615,7 +615,7 @@ class FDSC_DeepLabNet:
 
         img_input = Input(shape=(self.input_h, self.input_w, 3))
         # Lambda layer: scale input before feeding to the network
-        img_input = Lambda(lambda x: scale_input(x))(img_input)
+        batches_input = Lambda(lambda x: scale_input(x))(img_input)
 
         if self.backbone == 'xception':
             if self.OS == 8:
@@ -628,7 +628,7 @@ class FDSC_DeepLabNet:
                 middle_block_rate = 1
                 exit_block_rates = (1, 2)
                 atrous_rates = (6, 12, 18)
-            x = Conv2D(32, (3, 3), strides=(2, 2), use_bias=False, padding='same')(img_input)
+            x = Conv2D(32, (3, 3), strides=(2, 2), use_bias=False, padding='same')(batches_input)
 
             x = BatchNormalization(name='entry_flow_conv1_1_BN')(x)
             x = Activation(self.activation)(x)
@@ -652,7 +652,7 @@ class FDSC_DeepLabNet:
         else:
             self.OS = 8
             first_block_filters = make_divisible(32 * self.alpha, 8)
-            x = Conv2D(first_block_filters, kernel_size=3, strides=(2, 2), padding='same', use_bias=False)(img_input)
+            x = Conv2D(first_block_filters, kernel_size=3, strides=(2, 2), padding='same', use_bias=False)(batches_input)
             x = BatchNormalization(epsilon=1e-3, momentum=0.999)(x)
 
             x = Lambda(lambda x: relu(x, max_value=6.))(x)
