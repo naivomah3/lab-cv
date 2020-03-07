@@ -18,12 +18,14 @@ export IN_WIDTH=320 #
 export WEIGHTS_OUT_PATH=models/
 export PRE_TRAINED=False
 export WEIGHTS_IN_PATH=models/road_seg_nit_unet_vgg16_320_320_weights_24_02_20-00_32_AM/road_seg_nit_unet_vgg16_320_320_weights_24_02_20-00_32_AM_99.h5    # Full path of pre-trained weights
-export PROBLEM=road_seg_nit
+export PROBLEM=road_seg_udd
 export LABELS_FILE=labels.txt
 # MODEL:
-# {unet, bcd_unet_d1, bcd_unet_d3, fcn_densenet_56, fcn_densenet_67, fcn_densenet_103}
-export MODEL=fcn_densenet_103
-export BACKBONE=vgg16
+# {unet, bcd_unet_d1, bcd_unet_d3, fcn_densenet_56, fcn_densenet_67, fcn_densenet_103, deeplab_v3_plus}
+export MODEL=deeplab_v3_plus
+# BACKBONE:
+# {none, vgg16, xception, mobilenetv2}
+export BACKBONE=mobilenetv2
 # --------------------
 # Define script loader
 # --------------------
