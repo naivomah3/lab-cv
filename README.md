@@ -64,4 +64,5 @@ sh predict.sh
 | 18-12-2019 | add U-Net model    | [paper](https://arxiv.org/abs/1505.04597) 
 | 22-02-2020 | add BCDU-Net model | [paper](https://arxiv.org/abs/1909.00166)
 | 29-02-2020 | add FC-DenseNet model  | [paper](https://arxiv.org/abs/1611.09326)
+| 08-03-2020 | add DeepLab-v3+ model  | [paper](https://arxiv.org/abs/1611.09326)
 
