@@ -2,15 +2,6 @@ from tensorflow.keras import backend as K
 import tensorflow as tf
 
 
-def scale_input(x):
-    '''pre-processing: scaling/normalization
-    rtype: x = {(x / 255) - 0.5} * 2 <- to be proved
-    '''
-    x /= 255.
-    # x -= 0.5
-    # x *= 2.
-    return x
-
 # Binary DSC - IoU
 def dice(y_true, y_pred, smooth=1e-6):
     y_true_f = K.flatten(y_true)
