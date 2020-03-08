@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import tensorflow as tf
 from keras.models import Model  # Functional API
 from keras import layers
 from keras.layers import (
@@ -482,7 +481,7 @@ class FC_DenseNet:
 
 
 # Deeplab-v3+
-class FDSC_DeepLabNet:
+class DSC_DeepLab_v3_plus:
     def __init__(self,
                  pre_trained=False,  # if True, set weights_path
                  weights_path=None,  # full-path to the pre-trained weights
@@ -506,7 +505,7 @@ class FDSC_DeepLabNet:
         self.OS = 16
         self.alpha = 1.
 
-    def depth_conv(self, x, filters, stride=1, kernel_size=3, rate=1, depth_activation=False, eps=1e-3):
+    def depth_sep_conv(self, x, filters, stride=1, kernel_size=3, rate=1, depth_activation=False, eps=1e-3):
         """
         Depth-wise Convolution:
         1. Depth-wise Separable Convolution
@@ -561,11 +560,11 @@ class FDSC_DeepLabNet:
 
         residual = inputs
         for i in range(3):
-            residual = self.depth_conv(residual,
-                                  depth_list[i],
-                                  stride=stride if i == 2 else 1,
-                                  rate=rate,
-                                  depth_activation=depth_activation)
+            residual = self.depth_sep_conv(residual,
+                                           depth_list[i],
+                                           stride=stride if i == 2 else 1,
+                                           rate=rate,
+                                           depth_activation=depth_activation)
             if i == 1:
                 skip = residual
         if skip_connect_type == 'conv':
@@ -604,9 +603,6 @@ class FDSC_DeepLabNet:
 
         if skip_connection:
             return Add()([inputs, x])
-
-        # if in_channels == pointwise_filters and stride == 1:
-        #    return Add(name='res_connect_' + str(block_id))([inputs, x])
         return x
 
     def build(self):
@@ -701,24 +697,24 @@ class FDSC_DeepLabNet:
         b4 = AveragePooling2D(pool_size=(int(np.ceil(self.input_h / self.OS)), int(np.ceil(self.input_w / self.OS))))(x)
 
         b4 = Conv2D(256, (1, 1), padding='same', use_bias=False, name='image_pooling')(b4)
-        b4 = BatchNormalization(name='image_pooling_BN', epsilon=1e-5)(b4)
+        b4 = BatchNormalization(epsilon=1e-5)(b4)
         b4 = Activation(self.activation)(b4)
 
         b4 = Lambda(lambda x: K.tf.image.resize_bilinear(x, size=(int(np.ceil(self.input_h / self.OS)), int(np.ceil(self.input_w / self.OS)))))(b4)
 
         # simple 1x1
         b0 = Conv2D(256, (1, 1), padding='same', use_bias=False, name='aspp0')(x)
-        b0 = BatchNormalization(name='aspp0_BN', epsilon=1e-5)(b0)
+        b0 = BatchNormalization(epsilon=1e-5)(b0)
         b0 = Activation(self.activation)(b0)
 
         # there are only 2 branches in mobilenetV2. not sure why
         if self.backbone == 'xception':
             # rate = 6 (12)
-            b1 = self.depth_conv(x, 256, rate=atrous_rates[0], depth_activation=True, eps=1e-5)
+            b1 = self.depth_sep_conv(x, 256, rate=atrous_rates[0], depth_activation=True, eps=1e-5)
             # rate = 12 (24)
-            b2 = self.depth_conv(x, 256, rate=atrous_rates[1], depth_activation=True, eps=1e-5)
+            b2 = self.depth_sep_conv(x, 256, rate=atrous_rates[1], depth_activation=True, eps=1e-5)
             # rate = 18 (36)
-            b3 = self.depth_conv(x, 256, rate=atrous_rates[2], depth_activation=True, eps=1e-5)
+            b3 = self.depth_sep_conv(x, 256, rate=atrous_rates[2], depth_activation=True, eps=1e-5)
 
             # concatenate ASPP branches & project
             x = Concatenate()([b4, b0, b1, b2, b3])
@@ -730,7 +726,6 @@ class FDSC_DeepLabNet:
         x = Activation(self.activation)(x)
         x = Dropout(0.1)(x)
 
-
         # DeepLab v.3+ decoder
         if self.backbone == 'xception':
             # Feature projection
@@ -741,8 +736,8 @@ class FDSC_DeepLabNet:
             dec_skip1 = BatchNormalization(epsilon=1e-5)(dec_skip1)
             dec_skip1 = Activation(self.activation)(dec_skip1)
             x = Concatenate()([x, dec_skip1])
-            x = self.depth_conv(x, 256, depth_activation=True, eps=1e-5)
-            x = self.depth_conv(x, 256, depth_activation=True, eps=1e-5)
+            x = self.depth_sep_conv(x, 256, depth_activation=True, eps=1e-5)
+            x = self.depth_sep_conv(x, 256, depth_activation=True, eps=1e-5)
 
 
         # Output layer

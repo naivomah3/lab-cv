@@ -49,7 +49,6 @@ if __name__ == '__main__':
     model.summary()
     exit()
 
-
     # Load data using generator
     if generator:
         train_generator = data_generator(frames_path=FRAMES_TRAIN_PATH,

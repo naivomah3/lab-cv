@@ -24,7 +24,7 @@ export LABELS_FILE=labels.txt
 # {unet, bcd_unet_d1, bcd_unet_d3, fcn_densenet_56, fcn_densenet_67, fcn_densenet_103, deeplab_v3_plus}
 export MODEL=deeplab_v3_plus
 # BACKBONE:
-# {none, vgg16, xception, mobilenetv2}
+# {default, vgg16, xception, mobilenetv2}
 export BACKBONE=mobilenetv2
 # --------------------
 # Define script loader
