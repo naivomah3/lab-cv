@@ -20,7 +20,6 @@ VAL_BATCH_SIZE = int(os.environ.get("VAL_BATCH_SIZE"))
 # Steps per epoch:
 TRAIN_STEPS_PER_EPOCH = int(os.environ.get("TRAIN_STEPS_PER_EPOCH"))
 VAL_STEPS_PER_EPOCH = int(os.environ.get("VAL_STEPS_PER_EPOCH"))
-# Number of epochs
 # Frames&masks input dimensions
 IN_HEIGHT = int(os.environ.get("IN_HEIGHT"))
 IN_WIDTH = int(os.environ.get("IN_WIDTH"))
@@ -47,7 +46,6 @@ if __name__ == '__main__':
     network = MODELS[MODEL]
     model = network.build()
     model.summary()
-    exit()
 
     # Load data using generator
     if generator:
