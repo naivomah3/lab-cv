@@ -28,10 +28,10 @@ __pycache__/
 # mkdocs documentation
 /site
 
-# input data and models
+# input data and models_weights
 input/
 output/
-models/
+models_weights/
 
 # Data files
 *.csv
