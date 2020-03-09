@@ -12,14 +12,14 @@ def get_callbacks(weights_path=None, model_name=None, ):
         # CB 1: saving history
         keras.callbacks.CSVLogger(os.path.join(weights_path, model_name, f"{model_name}.csv"),
                                   append=True),
-        # CB 2: saving model/weights
+        # CB 2: saving model/models_weights
         keras.callbacks.ModelCheckpoint(filepath=os.path.join(weights_path, model_name, model_name) + "_{epoch:02d}.h5",
                                         monitor='dice',
                                         verbose=1,
                                         mode='max',
                                         #save_best_only=True,
                                         save_weights_only=True,
-                                        period=1),  # save weights each epoch
+                                        period=1),  # save models_weights each epoch
         # CB 3: Early stopping if no improvement within 20 epochs
         keras.callbacks.EarlyStopping(monitor='val_dice', mode='max', patience=20),
 
