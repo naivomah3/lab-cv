@@ -15,10 +15,10 @@ FRAMES_TEST_OUT_PATH = os.environ.get("FRAMES_TEST_OUT_PATH")
 MASKS_TEST_OUT_PATH = os.environ.get("MASKS_TEST_OUT_PATH")
 MASKS_PREDICT_OUT_PATH = os.environ.get("MASKS_PREDICT_OUT_PATH")
 # Model path
-WEIGHTS_PATH = os.environ.get("WEIGHTS_PATH")
+WEIGHTS_IN_PATH = os.environ.get("WEIGHTS_IN_PATH")
 # Frames&masks input dimension
-INPUT_HEIGHT = int(os.environ.get("INPUT_HEIGHT"))
-INPUT_WIDTH = int(os.environ.get("INPUT_WIDTH"))
+IN_HEIGHT = int(os.environ.get("IN_HEIGHT"))
+IN_WIDTH = int(os.environ.get("IN_WIDTH"))
 # Model
 MODEL = os.environ.get("MODEL")
 
@@ -35,25 +35,23 @@ if __name__ == '__main__':
     test_frames = None
     test_masks = None
 
-    if not os.path.isfile(WEIGHTS_PATH):
-        quit(f"Model file not found {WEIGHTS_PATH}")
+    if not os.path.isfile(WEIGHTS_IN_PATH):
+        quit(f"Model file not found {WEIGHTS_IN_PATH}")
     if not os.path.isdir(FRAMES_TEST_IN_PATH) or not os.path.isdir(MASKS_TEST_IN_PATH):
         quit(f"Directory not found")
 
     # Load model from dispatcher and build
     network = MODELS[MODEL]
     model = network.build()
-    model.summary()
-
-    # model.summary()
+    #model.summary()
 
     # If images are loaded from generator
     if is_generator:
         test_data_generated = data_generator(frames_path=FRAMES_TEST_IN_PATH,
                                              masks_path=MASKS_TEST_IN_PATH,
                                              fnames=os.listdir(MASKS_TEST_IN_PATH),
-                                             input_h=INPUT_HEIGHT,
-                                             input_w=INPUT_WIDTH,
+                                             input_h=IN_HEIGHT,
+                                             input_w=IN_WIDTH,
                                              n_classes=NO_CLASSES,
                                              batch_size=1,
                                              is_resizable=True)
@@ -63,8 +61,8 @@ if __name__ == '__main__':
     else:
         test_frames, test_masks = data_loader(frames_path=FRAMES_TEST_IN_PATH,
                                               masks_path=MASKS_TEST_IN_PATH,
-                                              input_h=INPUT_HEIGHT,
-                                              input_w=INPUT_WIDTH,
+                                              input_h=IN_HEIGHT,
+                                              input_w=IN_WIDTH,
                                               n_classes=NO_CLASSES,
                                               fnames=os.listdir(MASKS_TEST_IN_PATH),
                                               is_resizable=False)
@@ -81,19 +79,14 @@ if __name__ == '__main__':
     for i in range(test_frames.shape[0]):
         fname = get_rand_name()
         # Save original frame
-        cv2.imwrite(os.path.join(FRAMES_TEST_OUT_PATH, fname + '.png'),
-                    test_frames[i])
+        cv2.imwrite(os.path.join(FRAMES_TEST_OUT_PATH, fname + '.png'), test_frames[i])
         # Save ground truth mask
-        cv2.imwrite(os.path.join(MASKS_TEST_OUT_PATH, fname + '.png'),
-                    color_img(test_masks[i], NO_CLASSES))
+        cv2.imwrite(os.path.join(MASKS_TEST_OUT_PATH, fname + '.png'), color_img(test_masks[i], NO_CLASSES))
         # Save predicted mask
-        cv2.imwrite(os.path.join(MASKS_PREDICT_OUT_PATH, fname + '.png'),
-                    color_img(predicted_masks[i], NO_CLASSES))
-
+        cv2.imwrite(os.path.join(MASKS_PREDICT_OUT_PATH, fname + '.png'), color_img(predicted_masks[i], NO_CLASSES))
 
     # Evaluation
     ious, dices, precision, recall, accuracy = evaluate(masks=test_masks, predictions=predicted_masks, n_classes=NO_CLASSES)
-
 
     # Get scores
     print_scores(ious, dices, precision, recall, accuracy, labels=LABELS)
