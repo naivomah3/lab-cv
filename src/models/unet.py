@@ -34,9 +34,12 @@ class UNet:
 
     # Build U-Net: original paper
     def build(self):
+        # ======================================== INPUT ==========================================
         inBlock = Input(shape=(self.input_h, self.input_w, 3), dtype='float32')
         # Lambda layer: scale input before feeding to the network
         inScaled = Lambda(lambda x: scale_input(x))(inBlock)
+
+        # ======================================== ENCODER ========================================
         # Block 1d
         convB1d = Conv2D(64, (3, 3), activation=self.activation, kernel_initializer=self.kernel_init, padding='same')(inScaled)
         convB1d = BatchNormalization()(convB1d)
@@ -61,11 +64,14 @@ class UNet:
         convB4d = Conv2D(512, (3, 3), activation=self.activation, kernel_initializer=self.kernel_init, padding='same')(convB4d)
         convB4d = BatchNormalization()(convB4d)
         poolB4d = MaxPooling2D(pool_size=(2, 2))(convB4d)
-        # Bottleneck
+
+        # ===================================== BOTTLENECK ======================================
         convBn = Conv2D(1024, (3, 3), activation=self.activation, kernel_initializer=self.kernel_init, padding='same')(poolB4d)
         convBn = BatchNormalization()(convBn)
         convBn = Conv2D(512, (3, 3), activation=self.activation, kernel_initializer=self.kernel_init, padding='same')(convBn)
         convBn = BatchNormalization()(convBn)
+
+        # ====================================== DECODER =======================================
         # Block 4u
         convB4u = Conv2DTranspose(512, (2, 2), strides=(2, 2), padding='same')(convBn)
         convB4u = concatenate([convB4u, convB4d])
@@ -95,7 +101,7 @@ class UNet:
         convB1u = Conv2D(64, (3, 3), activation=self.activation, kernel_initializer=self.kernel_init, padding='same')(convB1u)
         convB1u = BatchNormalization()(convB1u)
 
-        # Output layer
+        # ======================================== OUTPUT ==========================================
         if self.n_classes == 2:
             outBlock = Conv2D(1, (1, 1), activation='sigmoid', padding='same')(convB1u)
         else:

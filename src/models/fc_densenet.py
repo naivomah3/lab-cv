@@ -2,12 +2,13 @@ import os
 from keras.models import Model  # Functional API
 from keras.layers import (
     Conv2D, Input, MaxPooling2D,
-    Conv2DTranspose, Dropout,
+    Conv2DTranspose, Dropout, Lambda,
     concatenate, BatchNormalization, Activation)
 from keras.optimizers import Adam
 #from tensorflow.keras import backend as K
 
 from src.metrics import (dice, jaccard)
+from src.engine import scale_input
 
 class FC_DenseNet:
     def __init__(self,
@@ -29,7 +30,7 @@ class FC_DenseNet:
         self.activation = activation
         self.kernel_init = kernel_init
         self.model_name = model_name
-        self.filters = 48   # this value is the number of filter of the first convolution block --> this will be updated at the beginning of each dense block
+        self.input_filters = 48   # this value is the number of filter of the first convolution block --> this will be updated at the beginning of each dense block
         # Local setting
         if model_name == 'fcn_densenet_56':
             self.n_pool = 5    # Corresponds to number of dense block --> number of transition up/down
@@ -71,39 +72,39 @@ class FC_DenseNet:
 
     def build(self):
         # ======================================== INPUT ==========================================
-        # Input layer
         input_layer = Input(shape=(self.input_h, self.input_w, 3), dtype='float32')
-        # # Lambda layer: scale input before feeding to the network
-        # inScaled = Lambda(lambda x: scale_input(x))(inBlock)
+        # Lambda layer: scale input before feeding to the network
+        inScaled = Lambda(lambda x: scale_input(x))(input_layer)
         # First block
-        stack = Conv2D(self.filters, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last')(input_layer)
+        stack = Conv2D(self.input_filters, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last')(inScaled)
 
         # ======================================== ENCODER ========================================
         # To save the output of each dense block of the down-sampling path to later concatenate to the transition up
         skip_connections = list()
         for i in range(self.n_pool):
-            # Dense block
+            # DB: Dense-Block
             for j in range(self.n_layers_per_dense_block[i]):
                 l = self.dense_block(stack, self.growth_rate)
                 stack = concatenate([stack, l])
                 # Update filters
-                self.filters += self.growth_rate
+                self.input_filters += self.growth_rate
                 # save the current output
             skip_connections.append(stack)
-            # TD
-            stack = self.transition_down(stack, self.filters)
+            # TD: Transition-Up
+            stack = self.transition_down(stack, self.input_filters)
 
         # ===================================== BOTTLENECK ======================================
         # store the output of each dense block and upsample them all as well
         block_to_upsample = []
         # Create the bottleneck dense block
         for i in range(self.n_layers_per_dense_block[self.n_pool]):
+            # DB: Dense-Block
             l = self.dense_block(stack, self.growth_rate)
             block_to_upsample.append(l)
             stack = concatenate([stack, l])
 
         # ====================================== DECODER =======================================
-        # Revert the order within the skip-connections to get the last stacked layer at index=0
+        # Revert the order of layers within the skip-connections to get the last pooling-layer at index=0
         skip_connections = skip_connections[::-1]
 
         for j in range(self.n_pool):
@@ -122,13 +123,12 @@ class FC_DenseNet:
                 stack = concatenate([stack, l])
 
         # ======================================== OUTPUT ==========================================
-        # Output layer
         if self.n_classes == 2:
             stack = Conv2D(1, (1, 1), activation='sigmoid', padding='same', data_format='channels_last')(stack)
         else:
             stack = Conv2D(self.n_classes, (1, 1), activation='softmax', padding='same', data_format='channels_last')(stack)
 
-        # Create model
+        # Compile model
         model = Model(inputs=input_layer, outputs=stack, name=self.model_name)
         model.compile(optimizer=Adam(),
                       loss="categorical_crossentropy",
