@@ -28,6 +28,7 @@ NO_EPOCHS = int(os.environ.get("NO_EPOCHS"))
 # get problem name for naming history/model
 P_NAME = os.environ.get("PROBLEM")
 
+
 # load file containing list of classes
 LABELS_FILE = os.environ.get("LABELS_FILE")
 with open(LABELS_FILE, 'r') as file:
@@ -46,6 +47,7 @@ if __name__ == '__main__':
     network = MODELS[MODEL]
     model = network.build()
     model.summary()
+    # exit()
 
     # Load data using generator
     if generator:
@@ -104,5 +106,8 @@ if __name__ == '__main__':
                             batch_size=TRAIN_BATCH_SIZE,
                             verbose=1,
                             callbacks=callbacks)
+
+
+
 
 
