@@ -29,7 +29,7 @@ source activate ENV_NAME
 ### Install required packages
 
 
-## Directory structure
+## Dataset directory structure
 * `/input` contains images/frames and their respective masks within each 
 set(training/validation/testing). Within `mask`, the ground truth set would be a 2D matrix of dimension `(height x width)` and each pixel's value maps the spatial distribution of each respective label. 
 As an example, please find [here](https://github.com/naivomah3/lab-cv/blob/master/notebooks/image-preprocessing.ipynb)
