@@ -13,7 +13,7 @@ def get_rand_name(size=30, chars=string.ascii_letters + string.digits):
 
 def mk_dir(*args):
     dir = os.path.join(os.getcwd(), *args)
-    print(dir)
+    # print(dir)
     if not os.path.exists(dir):
         os.makedirs(dir)
         return True
@@ -24,9 +24,9 @@ def lr_decay(epoch):
     Learning rate scheduler
     '''
     init_lr = 0.01
-    drop = 0.7
-    frequency_drop = 5.0
-    lr = init_lr * math.pow(drop, math.floor((1 + epoch) / frequency_drop))
+    drop_factor = 0.7
+    drop_freq = 5.0
+    lr = init_lr * math.pow(drop_factor, math.floor((1 + epoch) / drop_freq))
     return lr
 
 
