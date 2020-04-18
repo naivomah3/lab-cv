@@ -68,10 +68,12 @@ sh predict.sh
 ```
 
 ##### Major update
-| Timeline | Comments |  Reference |
-| -------- | -------- | -----------| 
-| 18-12-2019 | add U-Net model    | [paper](https://arxiv.org/abs/1505.04597) 
-| 22-02-2020 | add BCDU-Net model | [paper](https://arxiv.org/abs/1909.00166)
-| 29-02-2020 | add FC-DenseNet model  | [paper](https://arxiv.org/abs/1611.09326)
-| 08-03-2020 | add DeepLab-v3+ model  | [paper](https://arxiv.org/abs/1802.02611)
+| Timeline |         Comments           | Source                                                                                       |        Reference                          |
+| -------- | -------------------------- | -------------------------------------------------                                            | ----------------------------------------  | 
+| 18-12-2019 | U-Net model added        |    [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/unet.py)              | [paper](https://arxiv.org/abs/1505.04597) | 
+| 22-02-2020 | BCDU-Net model added     |    [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/bcd_unet.py)          | [paper](https://arxiv.org/abs/1909.00166) |
+| 29-02-2020 | FC-DenseNet model added  |    [paper](https://github.com/naivomah3/lab-cv/blob/master/src/models/fc_densenet.py)        | [paper](https://arxiv.org/abs/1611.09326) |
+| 08-03-2020 | DeepLab-v3+ model added  |   [paper](https://github.com/naivomah3/lab-cv/blob/master/src/models/deeplab_v3_plus.py)     | [paper](https://arxiv.org/abs/1802.02611) |
+| 18-04-2020 | SegNet model added       |   [paper](https://github.com/naivomah3/lab-cv/blob/master/src/models/segnet.py)              | [paper](https://arxiv.org/abs/1511.00561) |
+| 08-03-2020 | FCN model added          |  [paper](https://github.com/naivomah3/lab-cv/blob/master/src/models/fcn_8s.py)               | [paper](https://arxiv.org/abs/1411.4038)  |
 
