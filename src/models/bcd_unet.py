@@ -139,7 +139,7 @@ class BCD_UNet_D3:
         self.model_name = model_name
 
     def build(self):
-        # Compile model
+
         inBlock = Input(shape=(self.input_h, self.input_w, 3), dtype='float32')
         # Lambda layer: scale input before feeding to the network
         inScaled = Lambda(lambda x: scale_input(x))(inBlock)
@@ -155,7 +155,6 @@ class BCD_UNet_D3:
         # Block 3d
         convB3d = Conv2D(256, (3, 3), activation=self.activation, kernel_initializer=self.kernel_init, padding='same')(poolB2d)
         convB3d = Conv2D(256, (3, 3), activation=self.activation, kernel_initializer=self.kernel_init, padding='same')(convB3d)
-        #dropB3d = Dropout(0.5)(convB3d)
         poolB3d = MaxPooling2D(pool_size=(2, 2))(convB3d)
 
         # =============================================== BOTTLENECK =================================================
