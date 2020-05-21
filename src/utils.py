@@ -70,8 +70,8 @@ def get_flops(file_path, model_name):
     # Append DF
     data = {
         'model': [model_name],
-        'flops': [flops.total_float_ops],
-        'params': [params.total_parameters]
+        'flops': [f"{flops.total_float_ops/1e6:.3}"],
+        'params': [f"{params.total_parameters/1e6:.3}"]
     }
     df = pd.DataFrame(data, columns=['model', 'flops', 'params'])
 
