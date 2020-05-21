@@ -6,6 +6,8 @@ from src.models.deeplab_v3_plus import DSC_DeepLab_v3_plus
 from src.models.fcn_8s import FCN_8s
 from src.models.dense_unet import Dense_UNet
 from src.models.segnet import SegNet
+from src.models.dw_unet import DWUNet
+from src.models.dw_dense_unet import DwDenseUNet
 
 WEIGHTS_IN_PATH = os.environ.get("WEIGHTS_IN_PATH") # should be the pre-trained models_weights full path
 IN_HEIGHT = int(os.environ.get("IN_HEIGHT"))
@@ -28,6 +30,7 @@ MODELS = {
                 input_w=IN_WIDTH,
                 model_name=f"{MODEL}"),
 
+
     # Fully Convolutional Network
     'fcn_8s': FCN_8s(pre_trained=is_pretrained,
                     weights_path=WEIGHTS_IN_PATH,
@@ -35,6 +38,7 @@ MODELS = {
                     input_h=IN_HEIGHT,
                     input_w=IN_WIDTH,
                     model_name=f"{MODEL}"),
+
 
     # Dense-U-Net(proposed model for experiments)
     'dense_unet': Dense_UNet(pre_trained=is_pretrained,
@@ -44,6 +48,41 @@ MODELS = {
                     input_w=IN_WIDTH,
                     model_name=f"{MODEL}"),
 
+
+    # Depth-wise Separable UNet
+    'dw_unet' : DWUNet(pre_trained=is_pretrained,
+                           weights_path=WEIGHTS_IN_PATH,
+                           n_classes=CLASSES,
+                           input_h=IN_HEIGHT,
+                           input_w=IN_WIDTH,
+                           model_name=f"{MODEL}"),
+
+
+    # Depth-wise Separable Dense UNet - Dense block size = 10
+    'dw_dense_unet_d10' : DwDenseUNet(pre_trained=is_pretrained,
+                                       weights_path=WEIGHTS_IN_PATH,
+                                       n_classes=CLASSES,
+                                       input_h=IN_HEIGHT,
+                                       input_w=IN_WIDTH,
+                                       dense_block_size=10,
+                                       model_name=f"{MODEL}"),
+    # Depth-wise Separable Dense UNet - Dense block size = 15
+    'dw_dense_unet_d15' : DwDenseUNet(pre_trained=is_pretrained,
+                                       weights_path=WEIGHTS_IN_PATH,
+                                       n_classes=CLASSES,
+                                       input_h=IN_HEIGHT,
+                                       input_w=IN_WIDTH,
+                                       dense_block_size=15,
+                                       model_name=f"{MODEL}"),
+    # Depth-wise Separable Dense UNet - Dense block size = 20
+    'dw_dense_unet_d20' : DwDenseUNet(pre_trained=is_pretrained,
+                                       weights_path=WEIGHTS_IN_PATH,
+                                       n_classes=CLASSES,
+                                       input_h=IN_HEIGHT,
+                                       input_w=IN_WIDTH,
+                                       dense_block_size=20,
+                                       model_name=f"{MODEL}"),
+
     # SegNet: A deep convolutional encoder-decoder architecture for image segmentation
     'seg_net': SegNet(pre_trained=is_pretrained,
                     weights_path=WEIGHTS_IN_PATH,
@@ -51,6 +90,7 @@ MODELS = {
                     input_h=IN_HEIGHT,
                     input_w=IN_WIDTH,
                     model_name=f"{MODEL}"),
+
 
     # Bi-Directional ConvLSTM U-Net with Densely Connected Convolutions
     'bcd_unet_d3': BCD_UNet_D3(pre_trained=is_pretrained,
@@ -65,6 +105,8 @@ MODELS = {
                                     input_h=IN_HEIGHT,
                                     input_w=IN_WIDTH,
                                     model_name=f"{MODEL}"),
+
+
     # Fully Convolutional Network: 3 variants
     'fcn_densenet_103': FC_DenseNet(pre_trained=is_pretrained,
                                 weights_path=WEIGHTS_IN_PATH,
@@ -84,6 +126,9 @@ MODELS = {
                                     input_h=IN_HEIGHT,
                                     input_w=IN_WIDTH,
                                     model_name=f"{MODEL}"),
+
+
+
     # DeepLabV3+: Depthwise Separable Convolution with 2 backbones available: Mobilenetv2 and Xception
     'deeplab_v3_plus': DSC_DeepLab_v3_plus(pre_trained=is_pretrained,
                                            weights_path=WEIGHTS_IN_PATH,
