@@ -91,9 +91,7 @@ class DSC_DeepLab_v3_plus:
                           padding='valid', use_bias=False,
                           dilation_rate=(rate, rate))(x)
 
-
     def xception_block(self, inputs, depth_list, skip_connect_type, stride, rate=1, depth_activation=False, return_skip=False):
-
         residual = inputs
         for i in range(3):
             residual = self.depth_sep_conv(residual,

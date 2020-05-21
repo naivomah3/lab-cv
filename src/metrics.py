@@ -1,7 +1,6 @@
 from tensorflow.keras import backend as K
 import tensorflow as tf
 
-
 # Binary DSC - IoU
 def dice(y_true, y_pred, smooth=1e-6):
     y_true_f = K.flatten(y_true)
