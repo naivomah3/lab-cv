@@ -73,7 +73,10 @@ sh predict.sh
 | 18-12-2019 | U-Net model added        |    [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/unet.py)              | [paper](https://arxiv.org/abs/1505.04597) | 
 | 22-02-2020 | BCDU-Net model added     |    [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/bcd_unet.py)          | [paper](https://arxiv.org/abs/1909.00166) |
 | 29-02-2020 | FC-DenseNet model added  |    [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/fc_densenet.py)        | [paper](https://arxiv.org/abs/1611.09326) |
-| 08-03-2020 | DeepLab-v3+ model added  |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/deeplab_v3_plus.py)     | [paper](https://arxiv.org/abs/1802.02611) |
-| 18-04-2020 | SegNet model added       |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/segnet.py)              | [paper](https://arxiv.org/abs/1511.00561) |
-| 08-03-2020 | FCN model added          |  [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/fcn_8s.py)               | [paper](https://arxiv.org/abs/1411.4038)  |
+| 08-03-2020 | DeepLab-v3+ model added                          |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/deeplab_v3_plus.py)     | [paper](https://arxiv.org/abs/1802.02611) |
+| 08-03-2020 | FCN model added                                  |  [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/fcn_8s.py)               | [paper](https://arxiv.org/abs/1411.4038)  |
+| 18-04-2020 | SegNet model added                               |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/segnet.py)              | [paper](https://arxiv.org/abs/1511.00561) |
+| 21-05-2020 | Depth-wise Separable UNet model added             |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/dw_unet.py)              | proposed model  |
+| 21-05-2020 | Depth-wise Separable Dense UNet model added       |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/dw_dense_unet.py)              | proposed model  |
+
 
