@@ -3,6 +3,10 @@ from datetime import datetime
 from src.data_generator import data_generator, data_loader
 from src.callbacks import get_callbacks
 from src.dispatcher import MODELS
+from src.utils import get_flops
+
+from keras import backend as K
+import tensorflow as tf
 
 # Load all environment variables
 FRAMES_TRAIN_PATH = os.environ.get("FRAMES_TRAIN_PATH")
@@ -24,6 +28,10 @@ VAL_STEPS_PER_EPOCH = int(os.environ.get("VAL_STEPS_PER_EPOCH"))
 IN_HEIGHT = int(os.environ.get("IN_HEIGHT"))
 IN_WIDTH = int(os.environ.get("IN_WIDTH"))
 NO_EPOCHS = int(os.environ.get("NO_EPOCHS"))
+# If only get FLOPS
+is_get_flops = False if os.environ.get("GET_FLOPS") == "False" else True
+if is_get_flops:
+    FLOPS_PATH = os.environ.get("FLOPS_PATH")
 
 # get problem name for naming history/model
 P_NAME = os.environ.get("PROBLEM")
@@ -36,18 +44,28 @@ with open(LABELS_FILE, 'r') as file:
 if not CLASSES:
     raise Exception("Unable to load label file")
 
+
+
 if __name__ == '__main__':
     generator = True
+
+    # Load model from dispatcher and build
+    network = MODELS[MODEL]
+    model = network.build()
+    #model.summary()
+    # exit()
+
+    # Get FLOPS
+    if is_get_flops:
+        total_flops, total_params = get_flops(FLOPS_PATH, MODEL)
+
+    print(total_flops, total_params)
+    exit()
 
     # define where to save the model
     model_name = f"{P_NAME}_{MODEL}_{BACKBONE}_{IN_HEIGHT}_{IN_WIDTH}_weights_{datetime.now().strftime('%d_%m_%y-%H_%M_%p')}"
     callbacks = get_callbacks(weights_path=WEIGHTS_OUT_PATH, model_name=model_name)
 
-    # Load model from dispatcher and build
-    network = MODELS[MODEL]
-    model = network.build()
-    model.summary()
-    # exit()
 
     # Load data using generator
     if generator:
