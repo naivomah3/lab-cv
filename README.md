@@ -80,6 +80,7 @@ sh predict.sh
 | 08-03-2020 | DeepLab-v3+ model added                          |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/deeplab_v3_plus.py)     | [paper](https://arxiv.org/abs/1802.02611) |
 | 08-03-2020 | FCN model added                                  |  [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/fcn_8s.py)               | [paper](https://arxiv.org/abs/1411.4038)  |
 | 18-04-2020 | SegNet model added                               |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/segnet.py)              | [paper](https://arxiv.org/abs/1511.00561) |
+| 18-04-2020 | Dense UNet model added                               |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/dense_unet.py)              | proposed model |
 | 21-05-2020 | Depth-wise Separable UNet model added             |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/dw_unet.py)              | proposed model  |
 | 21-05-2020 | Depth-wise Separable Dense UNet model added       |   [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/dw_dense_unet.py)              | proposed model  |
 
