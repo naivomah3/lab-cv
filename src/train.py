@@ -58,9 +58,8 @@ if __name__ == '__main__':
     # Get FLOPS
     if is_get_flops:
         total_flops, total_params = get_flops(FLOPS_PATH, MODEL)
-
-    print(total_flops, total_params)
-    exit()
+        print(total_flops, total_params)
+        exit()
 
     # define where to save the model
     model_name = f"{P_NAME}_{MODEL}_{BACKBONE}_{IN_HEIGHT}_{IN_WIDTH}_weights_{datetime.now().strftime('%d_%m_%y-%H_%M_%p')}"
