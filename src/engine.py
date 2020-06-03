@@ -87,11 +87,11 @@ def print_scores(ious=None, dices=None, precision=None, recall=None, accuracy=No
     # Per class evaluation
     for (i, _) in enumerate(labels):
         print(f"\nclass {i}({labels[i]}): \n"
-              f"Accuracy={accuracy[i]:.4f}, "
-              f"Precision={precision[i]:.4f}, "
-              f"Recall={recall[i]:.4f}, "
-              f"IoU={ious[i]:.4f}, "
-              f"F1-score={dices[i]:.4f},")
+              f"Accuracy={accuracy[i]:.2f}, "
+              f"Precision={precision[i]:.2f}, "
+              f"Recall={recall[i]:.2f}, "
+              f"IoU={ious[i]:.2f}, "
+              f"F1-score={dices[i]:.2f},")
 
     avg_iou = np.mean([float(x) for x in ious.values()])
     avg_dice = np.mean([float(x) for x in dices.values()])
@@ -100,8 +100,8 @@ def print_scores(ious=None, dices=None, precision=None, recall=None, accuracy=No
     avg_recall = np.mean([float(x) for x in recall.values()])
     # Average evaluation
     print(f"\nAvg: \n"
-          f"Accuracy={avg_accuracy:.4f}, "
-          f"Precision={avg_precision:.4f}, "
-          f"Recall={avg_recall:.4f}, "
-          f"IoU={avg_iou:.4f}, "
-          f"F1-score={avg_dice:.4f}")
+          f"Accuracy={avg_accuracy:.2f}, "
+          f"Precision={avg_precision:.2f}, "
+          f"Recall={avg_recall:.2f}, "
+          f"IoU={avg_iou:.2f}, "
+          f"F1-score={avg_dice:.2f}")
