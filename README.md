@@ -4,7 +4,7 @@ The project is aiming to address the road extraction problem in
 >an end-to-end fashion. Our dataset is a set of aerial images taken 
 >from UAV(drones) from local areas within the NIT Rourkela campus. 
 >Throughout the experiments, we are benchmarking different 
->state-of-the-art models and taking advantage of the technique being used to tackle our problem. 
+>state-of-the-art models and taking advantage of the techniques being used to tackle our problem. 
 >The main objective of this project is to build an effective CNN model, 
 >being able to distinguish roads from occlusion and background and able 
 >to generalize to later extension as well as to build our own dataset. 
@@ -12,8 +12,8 @@ The project is aiming to address the road extraction problem in
 > **Please note:** the development is undergoing and details will 
 > gradually be provided below. 
 
-## Prerequisites
-There are a few but important dependencies that need to be installed before making any change. 
+## Install required libraries
+There are a few important dependencies which need to be installed before making any change in pre-processing or expermenting the models.
 Note that the code has been tested using `python==3.6.7`. 
 ```bash 
 pip install -r requirements.txt
@@ -30,13 +30,10 @@ export WEIGHTS_IN_PATH=path/to/the/weights.h5    # full path of the weight
 conda create --name ENV_NAME python=3.6.7
 source activate ENV_NAME
 ```
-### Install required packages
 
-
-## Dataset directory structure
+### Dataset directory structure
 * `/input` contains images/frames and their respective masks within each 
-set(training/validation/testing). Within `mask`, the ground truth set would be a 2D matrix of dimension `(height x width)` and each pixel's value maps the spatial distribution of each respective label. 
-As an example, please find [here](https://github.com/naivomah3/lab-cv/blob/master/notebooks/image-preprocessing.ipynb)
+set(training/validation/testing). Within `mask`, the ground truth set would be a Tensor of dimension `(height x width)` and each pixel's value maps the spatial distribution of the respective label. 
 
 ```bash
 /input
@@ -50,7 +47,7 @@ As an example, please find [here](https://github.com/naivomah3/lab-cv/blob/maste
     ├── images
     └── mask
 ```
-* `/output` contains predicted masks referred from input/prediction along with their respective frames within each respective subfolders and named the same way to avoid confusion. `masks` and `prediction` sets would be a 2D matrix of dimension `(height x width x 3)` colored with respect to the spatial distribution of each class/label. As an example, please find here
+* `/output` contains predicted masks referred from input/prediction along with their respective frames within each respective subfolders and named the same way to avoid confusion. `masks` and `prediction` sets would be a (3D) tensor of dimension `(height x width x 3)` colored with respect to the spatial distribution of each class/label. As an example, please find here
 ```bash
 /output   
 └── prediction # Prediction data 
@@ -58,7 +55,7 @@ As an example, please find [here](https://github.com/naivomah3/lab-cv/blob/maste
     ├── mask
     └── prediction
 ```
-* `/models` where to store and load from the model weights. 
+* `/models` is place to store and load the model weights. 
 
 
 
@@ -71,7 +68,7 @@ sh train.sh
 sh predict.sh
 ```
 
-##### Major update
+### Timeline 
 | Timeline |         Comments           | Source                                                                                       |        Reference                          |
 | -------- | -------------------------- | -------------------------------------------------                                            | ----------------------------------------  | 
 | 18-12-2019 | U-Net model added        |    [source](https://github.com/naivomah3/lab-cv/blob/master/src/models/unet.py)              | [paper](https://arxiv.org/abs/1505.04597) | 

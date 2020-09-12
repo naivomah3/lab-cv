@@ -45,14 +45,13 @@ if not CLASSES:
     raise Exception("Unable to load label file")
 
 
-
 if __name__ == '__main__':
     generator = True
 
     # Load model from dispatcher and build
     network = MODELS[MODEL]
     model = network.build()
-    #model.summary()
+    # model.summary()
     # exit()
 
     # Get FLOPS
@@ -63,8 +62,8 @@ if __name__ == '__main__':
 
     # define where to save the model
     model_name = f"{P_NAME}_{MODEL}_{BACKBONE}_{IN_HEIGHT}_{IN_WIDTH}_weights_{datetime.now().strftime('%d_%m_%y-%H_%M_%p')}"
-    callbacks = get_callbacks(weights_path=WEIGHTS_OUT_PATH, model_name=model_name)
-
+    callbacks = get_callbacks(
+        weights_path=WEIGHTS_OUT_PATH, model_name=model_name)
 
     # Load data using generator
     if generator:
@@ -89,9 +88,11 @@ if __name__ == '__main__':
                                        training=True)
 
         history = model.fit_generator(generator=train_generator,
-                                      steps_per_epoch=TRAIN_STEPS_PER_EPOCH,  # train_len(800 images) = batch_size(20) * steps_per_epoch(40)
+                                      # train_len(800 images) = batch_size(20) * steps_per_epoch(40)
+                                      steps_per_epoch=TRAIN_STEPS_PER_EPOCH,
                                       validation_data=val_generator,
-                                      validation_steps=VAL_STEPS_PER_EPOCH,  # val_len(150 images) = batch_size * validation_steps
+                                      # val_len(150 images) = batch_size * validation_steps
+                                      validation_steps=VAL_STEPS_PER_EPOCH,
                                       epochs=NO_EPOCHS,
                                       verbose=1,
                                       callbacks=callbacks)
@@ -103,18 +104,19 @@ if __name__ == '__main__':
                                               input_h=IN_HEIGHT,
                                               input_w=IN_WIDTH,
                                               n_classes=CLASSES,
-                                              fnames=os.listdir(FRAMES_TRAIN_PATH),
+                                              fnames=os.listdir(
+                                                  FRAMES_TRAIN_PATH),
                                               is_resizable=False,
                                               training=True)
 
         val_frames, val_masks = data_loader(frames_path=FRAMES_VAL_PATH,
-                                              masks_path=MASKS_VAL_PATH,
-                                              input_h=IN_HEIGHT,
-                                              input_w=IN_WIDTH,
-                                              n_classes=CLASSES,
-                                              fnames=os.listdir(FRAMES_VAL_PATH),
-                                              is_resizable=False,
-                                              training=True)
+                                            masks_path=MASKS_VAL_PATH,
+                                            input_h=IN_HEIGHT,
+                                            input_w=IN_WIDTH,
+                                            n_classes=CLASSES,
+                                            fnames=os.listdir(FRAMES_VAL_PATH),
+                                            is_resizable=False,
+                                            training=True)
 
         history = model.fit(test_frames,
                             test_masks,
@@ -123,8 +125,3 @@ if __name__ == '__main__':
                             batch_size=TRAIN_BATCH_SIZE,
                             verbose=1,
                             callbacks=callbacks)
-
-
-
-
-

@@ -1,6 +1,10 @@
 numpy
+pandas
+seaborn
 scipy
 matplotlib
+albumentations
+
 # CPU Version
 tensorflow
 # uncomment for GPU version
